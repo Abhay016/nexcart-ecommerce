@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.util.*;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import com.nexcart.dto.APIResponseDTO;
 
@@ -27,6 +28,12 @@ public class MyGlobalExceptionHandler {
     public ResponseEntity<APIResponseDTO> handleAPIException(APIException ex) {
         APIResponseDTO response = new APIResponseDTO(ex.getMessage(), false);
         return ResponseEntity.status(ex.getStatus()).body(response);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<APIResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        APIResponseDTO response = new APIResponseDTO("Database constraint violation. Please use a unique category name and avoid manually conflicting IDs.", false);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
 }
