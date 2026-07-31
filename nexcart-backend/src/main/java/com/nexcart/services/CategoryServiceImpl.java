@@ -1,14 +1,23 @@
 package com.nexcart.services;
 
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import com.nexcart.Exceptions.APIException;
 import com.nexcart.Exceptions.ResourceNotFoundException;
+import com.nexcart.dto.CategoryResponseDTO;
 import com.nexcart.models.Category;
 import com.nexcart.repositories.CategoryRepository;
+import org.modelmapper.ModelMapper;
+import com.nexcart.dto.CategoryRequestDTO;
+import com.nexcart.config.AppConstants;
+
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -19,13 +28,28 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public List<Category> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
+    public CategoryResponseDTO<CategoryRequestDTO> getAllCategories(@RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
+                                                                    @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
+                                                                    @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+                                                                    @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+
+        List<Category> categories = categoryPage.getContent();
         if (categories.isEmpty()) {
             throw new APIException("No categories found", HttpStatus.NOT_FOUND.value());
         }
-        return categories;
+        List<CategoryRequestDTO> categoryDTOs = categories.stream()
+                .map(category -> modelMapper.map(category, CategoryRequestDTO.class))
+                .toList();
+        return new CategoryResponseDTO<>(categoryDTOs, categoryPage.getNumber(), categoryPage.getSize(), categoryPage.getTotalElements(),
+                categoryPage.getTotalPages(), categoryPage.isFirst(), categoryPage.isLast(),
+                sortBy, sortDirection);
     }
 
     @Override
