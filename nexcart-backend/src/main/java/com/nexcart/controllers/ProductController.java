@@ -1,5 +1,6 @@
 package com.nexcart.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,27 +38,48 @@ public class ProductController {
         return ResponseEntity.ok(productResponse);
     }
 
-    @GetMapping("/public/product/{id}")
+    @GetMapping("/public/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
 
-    @PostMapping("/admin/product")
-    public ResponseEntity<APIResponseDTO> createProduct(@Valid @RequestBody Product product) {
-        productService.createProduct(product);
-        APIResponseDTO response = new APIResponseDTO("Product created successfully", true);
+    @GetMapping("/public/categories/{categoryId}/products")
+    public ResponseEntity<ProductResponseDTO<Product>> getProductsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
+        ProductResponseDTO<Product> productResponse = productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortDirection);
+        return ResponseEntity.ok(productResponse);
+    }
+
+    @GetMapping("/public/products/keyword/{keyword}")
+    public ResponseEntity<ProductResponseDTO<Product>> getProductsByKeyword(@PathVariable String keyword,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection){
+        ProductResponseDTO<Product> productResponse = productService.searchProductByKeyword(keyword, pageNumber, pageSize, sortBy, sortDirection);
+        return ResponseEntity.ok(productResponse);
+    }
+
+    @PostMapping("/admin/categories/{categoryId}/product")
+    public ResponseEntity<APIResponseDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId) {
+        long id = productService.addProduct(product, categoryId);
+        APIResponseDTO response = new APIResponseDTO("Product with Id" + id + " created successfully", true);
         return ResponseEntity.status(201).body(response);
     }
 
-    @PutMapping("/admin/product/{id}")
+    @PutMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
         productService.updateProduct(id, product);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " updated successfully", true);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/product/{id}")
+    @DeleteMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " deleted successfully", true);

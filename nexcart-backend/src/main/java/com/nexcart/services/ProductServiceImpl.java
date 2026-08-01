@@ -48,7 +48,39 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void createProduct(Product product) {
+    public ProductResponseDTO<Product> getProductsByCategory(long categoryId, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Category ID", categoryId));
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Product> productPage = productRepository.findByCategory(category, pageable);
+
+        List<Product> products = productPage.getContent();
+        if (products.isEmpty()) {
+            throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
+        }
+
+        return new ProductResponseDTO<>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
+                productPage.getTotalPages(), productPage.isFirst(), productPage.isLast(), sortBy, sortDirection);
+    }
+
+    @Override
+    public ProductResponseDTO<Product> searchProductByKeyword(String keyword, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+        Page<Product> productPage = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%', pageable);
+
+        List<Product> products = productPage.getContent();
+        if (products.isEmpty()) {
+            throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
+        }
+
+        return new ProductResponseDTO<>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
+                productPage.getTotalPages(), productPage.isFirst(), productPage.isLast(), sortBy, sortDirection);
+    }
+
+    @Override
+    public long addProduct(Product product, long categoryId) {
         validateProduct(product);
 
         String normalizedName = product.getProductName().trim();
@@ -56,16 +88,17 @@ public class ProductServiceImpl implements ProductService {
             throw new APIException("Product already exists", HttpStatus.CONFLICT.value());
         }
 
-        if (product.getCategory() == null || product.getCategory().getCategoryId() == null) {
-            throw new APIException("Product category ID is required", HttpStatus.BAD_REQUEST.value());
-        }
-
-        Category category = categoryRepository.findById(product.getCategory().getCategoryId())
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category ID", product.getCategory().getCategoryId()));
 
         product.setProductName(normalizedName);
+        product.setImage("default.png");
         product.setCategory(category);
+        double specialPrice = product.getPrice() -
+                ((product.getDiscount() * 0.01) * product.getPrice());
+        product.setSpecialPrice(specialPrice);
         productRepository.save(product);
+        return product.getProductId();
     }
 
     @Override
@@ -80,9 +113,6 @@ public class ProductServiceImpl implements ProductService {
             throw new APIException("Product already exists", HttpStatus.CONFLICT.value());
         }
 
-        if (product.getCategory() == null || product.getCategory().getCategoryId() == null) {
-            throw new APIException("Product category ID is required", HttpStatus.BAD_REQUEST.value());
-        }
 
         Category category = categoryRepository.findById(product.getCategory().getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category ID", product.getCategory().getCategoryId()));
@@ -92,10 +122,11 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setImage(product.getImage());
         existingProduct.setPrice(product.getPrice());
         existingProduct.setDiscount(product.getDiscount());
-        existingProduct.setSpecialPrice(product.getSpecialPrice());
+        double specialPrice = product.getPrice() -
+                ((product.getDiscount() * 0.01) * product.getPrice());
+        product.setSpecialPrice(specialPrice);
         existingProduct.setQuantity(product.getQuantity());
         existingProduct.setCategory(category);
-
         productRepository.save(existingProduct);
     }
 
@@ -110,8 +141,8 @@ public class ProductServiceImpl implements ProductService {
         if (product == null || product.getProductName() == null || product.getProductName().trim().isEmpty()) {
             throw new APIException("Product name is required", HttpStatus.BAD_REQUEST.value());
         }
-        if (product.getPrice() == null || product.getCategory() == null || product.getCategory().getCategoryId() == null) {
-            throw new APIException("Product price and category ID are required", HttpStatus.BAD_REQUEST.value());
+        if (product.getPrice() == null) {
+            throw new APIException("Product price is required", HttpStatus.BAD_REQUEST.value());
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.nexcart.repositories;
 
-public class UserRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.nexcart.models.User;
+
+public interface UserRepository extends JpaRepository<User, Long> {
 }
