@@ -1,4 +1,5 @@
 package com.nexcart.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class CartItems {
     private Integer quantity;
     private Double productPrice;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;

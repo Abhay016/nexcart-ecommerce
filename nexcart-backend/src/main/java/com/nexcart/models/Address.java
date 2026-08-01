@@ -1,4 +1,5 @@
 package com.nexcart.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Address {
     private String country;
     private String pincode;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

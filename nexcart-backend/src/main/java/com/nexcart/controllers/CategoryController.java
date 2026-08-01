@@ -1,6 +1,5 @@
 package com.nexcart.controllers;
 
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,15 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.nexcart.models.Category;
 import com.nexcart.services.CategoryService;
 import jakarta.validation.Valid;
-import com.nexcart.dto.CategoryResponseDTO;
-import com.nexcart.dto.CategoryRequestDTO;
+import com.nexcart.models.Category;
 import com.nexcart.config.AppConstants;
 import com.nexcart.dto.APIResponseDTO;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nexcart.dto.CategoryResponseDTO;
 
 @RestController
 @RequestMapping("/api")
@@ -27,42 +23,44 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private final ModelMapper modelMapper;
-
-    public CategoryController(CategoryService categoryService, ModelMapper modelMapper) {
+    public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/public/categories")
-    public ResponseEntity<CategoryResponseDTO<CategoryRequestDTO>> getAllCategories(@RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
-                                                           @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
-                                                           @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
-                                                           @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
-        CategoryResponseDTO<CategoryRequestDTO> categoryResponse = categoryService.getAllCategories(pageNumber, pageSize, sortBy, sortDirection);
-        return ResponseEntity.ok(categoryResponse);
+    public ResponseEntity<CategoryResponseDTO<Category>> getAllCategories(
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
+        CategoryResponseDTO<Category> response = categoryService.getAllCategories(pageNumber, pageSize, sortBy, sortDirection);
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/admin/categories")
-    public ResponseEntity<APIResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
-        Category category = modelMapper.map(categoryRequestDTO, Category.class);
+    @GetMapping("/public/category/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+        Category category = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
+    }
+
+    @PostMapping("/admin/category")
+    public ResponseEntity<APIResponseDTO> createCategory(@Valid @RequestBody Category category) {
         categoryService.createCategory(category);
-        APIResponseDTO response = new APIResponseDTO("Category with Id " + category.getCategoryId() + " created successfully", true);
+        APIResponseDTO response = new APIResponseDTO("Category created successfully", true);
         return ResponseEntity.status(201).body(response);
     }
 
-    @PutMapping("/admin/categories/{id}")
-    public ResponseEntity<APIResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
-        Category category = modelMapper.map(categoryRequestDTO, Category.class);
+    @PutMapping("/admin/category/{id}")
+    public ResponseEntity<APIResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
         categoryService.updateCategory(id, category);
         APIResponseDTO response = new APIResponseDTO("Category with Id " + id + " updated successfully", true);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/categories/{categoryId}")
-    public ResponseEntity<APIResponseDTO> deleteCategory(@PathVariable Long categoryId) {
-        categoryService.deleteCategory(categoryId);
-        APIResponseDTO response = new APIResponseDTO("Category with Id " + categoryId + " deleted successfully", true);
+    @DeleteMapping("/admin/category/{id}")
+    public ResponseEntity<APIResponseDTO> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        APIResponseDTO response = new APIResponseDTO("Category with Id " + id + " deleted successfully", true);
         return ResponseEntity.ok(response);
     }
 }

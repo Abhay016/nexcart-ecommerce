@@ -1,4 +1,5 @@
 package com.nexcart.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -22,8 +23,8 @@ public class Payment {
 
     private String paymentMethod;
     private Double amount;
-    private Double discount;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "payment")
     private Order order;
 

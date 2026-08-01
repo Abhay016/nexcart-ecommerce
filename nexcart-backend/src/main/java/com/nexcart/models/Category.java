@@ -1,5 +1,7 @@
 package com.nexcart.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +14,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -29,6 +31,17 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String categoryName;
 
-    @OneToMany(mappedBy = "category")
-    private List<Product> products;
+    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Product> products;
+
+    @JsonIgnore
+    public Long getId() {
+        return this.categoryId;
+    }
+
+    public void setId(Long id) {
+        this.categoryId = id;
+    }
+
 }

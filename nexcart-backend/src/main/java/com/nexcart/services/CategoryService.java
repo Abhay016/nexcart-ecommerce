@@ -1,11 +1,12 @@
 package com.nexcart.services;
+
 import com.nexcart.dto.CategoryResponseDTO;
-import com.nexcart.dto.CategoryRequestDTO;
 import com.nexcart.models.Category;
 
 public interface CategoryService {
-    CategoryResponseDTO<CategoryRequestDTO> getAllCategories(int pageNumber, int pageSize, String sortBy, String sortDirection);
+    CategoryResponseDTO<Category> getAllCategories(int pageNumber, int pageSize, String sortBy, String sortDirection);
+    Category getCategoryById(Long categoryId);
     void createCategory(Category category);
-    void updateCategory(Long id, Category category);
-    String deleteCategory(Long categoryId);
+    void updateCategory(Long categoryId, Category category);
+    void deleteCategory(Long categoryId);
 }

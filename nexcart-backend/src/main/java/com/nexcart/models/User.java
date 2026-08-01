@@ -7,12 +7,12 @@ import lombok.AllArgsConstructor;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -25,17 +25,19 @@ public class User {
     private Long userId;
 
     private String username;
+
     private String email;
+
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private List<Address> addresses;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Address> addresses;
 
-    @OneToMany(mappedBy = "user")
-    private List<Order> orders;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Order> orders;
 
-    @OneToMany(mappedBy = "user")
-    private List<Cart> carts;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Cart> carts;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
