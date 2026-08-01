@@ -55,7 +55,7 @@ public class CategoryController {
     public ResponseEntity<APIResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
         Category category = modelMapper.map(categoryRequestDTO, Category.class);
         categoryService.updateCategory(id, category);
-        APIResponseDTO response = new APIResponseDTO("Category with Id " + category.getCategoryId() + " updated successfully", true);
+        APIResponseDTO response = new APIResponseDTO("Category with Id " + id + " updated successfully", true);
         return ResponseEntity.ok(response);
     }
 

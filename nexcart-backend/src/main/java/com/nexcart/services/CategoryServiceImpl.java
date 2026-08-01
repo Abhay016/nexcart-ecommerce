@@ -1,7 +1,6 @@
 package com.nexcart.services;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,13 +22,12 @@ import com.nexcart.config.AppConstants;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
-    @Autowired
     private ModelMapper modelMapper;
+
+    public CategoryServiceImpl(CategoryRepository categoryRepository, ModelMapper modelMapper) {
+        this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public CategoryResponseDTO<CategoryRequestDTO> getAllCategories(@RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
