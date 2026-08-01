@@ -1,0 +1,10 @@
+name: NexCart - Local
+values:
+  - key: baseUrl
+    value: 'http://localhost:8080'
+    enabled: true
+    type: default
+  - key: categoryId
+    value: '1'
+    enabled: true
+    type: default

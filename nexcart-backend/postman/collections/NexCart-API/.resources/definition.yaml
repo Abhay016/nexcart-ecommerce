@@ -1,0 +1,10 @@
+$kind: collection
+name: NexCart API
+description: |-
+  API collection for the NexCart e-commerce backend application.
+  Built with Spring Boot, this collection covers all available endpoints.
+
+  Base URL: {{baseUrl}}
+variables:
+  - key: baseUrl
+    value: 'http://localhost:8080'

@@ -1,0 +1,19 @@
+$kind: http-request
+name: Get All Categories
+method: GET
+url: '{{baseUrl}}/api/public/categories'
+order: 1000
+queryParams:
+  - key: pageNumber
+    value: '0'
+    description: Page number (0-indexed)
+  - key: pageSize
+    value: '10'
+    description: Number of items per page
+  - key: sortBy
+    value: categoryId
+    description: Field to sort by
+  - key: sortDirection
+    value: asc
+    description: Sort direction (asc or desc)
+description: Retrieve all categories with pagination and sorting support.
