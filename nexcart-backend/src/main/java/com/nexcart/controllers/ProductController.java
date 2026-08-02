@@ -2,6 +2,7 @@ package com.nexcart.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +28,7 @@ public class ProductController {
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-
+    
     @GetMapping("/public/products")
     public ResponseEntity<ProductResponseDTO<Product>> getAllProducts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
@@ -65,13 +66,15 @@ public class ProductController {
         return ResponseEntity.ok(productResponse);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<APIResponseDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId) {
         long id = productService.addProduct(product, categoryId);
-        APIResponseDTO response = new APIResponseDTO("Product with Id" + id + " created successfully", true);
+        APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " created successfully", true);
         return ResponseEntity.status(201).body(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
         productService.updateProduct(id, product);
@@ -79,6 +82,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

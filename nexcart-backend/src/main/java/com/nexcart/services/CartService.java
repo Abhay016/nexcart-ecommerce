@@ -1,9 +1,6 @@
 package com.nexcart.services;
 
-import java.util.List;
-
 import com.nexcart.models.Cart;
-import com.nexcart.models.CartItems;
 
 public interface CartService {
     Cart createCart(Long userId);

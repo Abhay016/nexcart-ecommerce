@@ -1,6 +1,7 @@
 package com.nexcart.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +44,7 @@ public class CategoryController {
         return ResponseEntity.ok(category);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/category")
     public ResponseEntity<APIResponseDTO> createCategory(@Valid @RequestBody Category category) {
         categoryService.createCategory(category);
@@ -50,6 +52,7 @@ public class CategoryController {
         return ResponseEntity.status(201).body(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/category/{id}")
     public ResponseEntity<APIResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
         categoryService.updateCategory(id, category);
@@ -57,6 +60,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/category/{id}")
     public ResponseEntity<APIResponseDTO> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);

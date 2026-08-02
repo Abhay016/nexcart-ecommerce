@@ -2,11 +2,8 @@ package com.nexcart.services;
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
 import com.nexcart.Exceptions.APIException;
 import com.nexcart.Exceptions.ResourceNotFoundException;
 import com.nexcart.models.Cart;
