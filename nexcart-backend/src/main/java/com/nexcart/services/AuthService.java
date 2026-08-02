@@ -11,7 +11,6 @@ import com.nexcart.models.User;
 import com.nexcart.repositories.RoleRepository;
 import com.nexcart.repositories.UserRepository;
 import com.nexcart.security.JwtUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,20 +25,23 @@ import java.util.stream.Collectors;
 @Service
 public class AuthService {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
     private JwtUtils jwtUtils;
+    
+    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+    }
 
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
         User user = userRepository.findByEmail(loginRequest.getEmail())
