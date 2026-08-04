@@ -1,12 +1,19 @@
 package com.nexcart.services;
 
 import java.util.List;
-
-import com.nexcart.models.Address;
+import com.nexcart.models.User;
+import com.nexcart.dto.AddressDTO;
 
 public interface AddressService {
-    Address createAddress(Long userId, Address address);
-    List<Address> getAddressesByUserId(Long userId);
-    Address updateAddress(Long addressId, Address address);
-    void deleteAddress(Long addressId);
+    AddressDTO createAddress(AddressDTO addressDTO, User user);
+
+    List<AddressDTO> getAddresses();
+
+    AddressDTO getAddressesById(Long addressId);
+
+    List<AddressDTO> getUserAddresses(User user);
+
+    AddressDTO updateAddress(Long addressId, AddressDTO addressDTO);
+
+    String deleteAddress(Long addressId);
 }

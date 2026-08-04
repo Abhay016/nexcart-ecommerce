@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressRequestDTO {
+public class AddressDTO {
     @NotBlank(message = "Building name is required")
     private String buildingName;
 

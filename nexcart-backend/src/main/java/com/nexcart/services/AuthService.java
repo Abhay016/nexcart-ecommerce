@@ -25,112 +25,112 @@ import java.util.stream.Collectors;
 @Service
 public class AuthService {
 
-    private AuthenticationManager authenticationManager;
+        private AuthenticationManager authenticationManager;
 
-    private UserRepository userRepository;
+        private UserRepository userRepository;
 
-    private RoleRepository roleRepository;
+        private RoleRepository roleRepository;
 
-    private PasswordEncoder passwordEncoder;
+        private PasswordEncoder passwordEncoder;
 
-    private JwtUtils jwtUtils;
-    
-    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtils = jwtUtils;
-    }
+        private JwtUtils jwtUtils;
 
-    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + loginRequest.getEmail()));
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-
-        String jwtToken = jwtUtils.generateToken(authentication);
-
-        Set<String> roleNames = user.getRoles().stream()
-                .map(role -> role.getRoleName().toString())
-                .collect(Collectors.toSet());
-
-        return new AuthResponseDTO(
-                jwtToken,
-                "Bearer",
-                user.getUserId(),
-                user.getUsername(),
-                user.getEmail(),
-                roleNames,
-                "User logged in successfully"
-        );
-    }
-
-    public AuthResponseDTO register(RegisterRequestDTO registerRequest) {
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("User already exists with email: " + registerRequest.getEmail());
+        public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository,
+                        RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+                this.authenticationManager = authenticationManager;
+                this.userRepository = userRepository;
+                this.roleRepository = roleRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.jwtUtils = jwtUtils;
         }
 
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("User already exists with username: " + registerRequest.getUsername());
+        public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+                User user = userRepository.findByEmail(loginRequest.getEmail())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "User not found with email: " + loginRequest.getEmail()));
+
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                loginRequest.getEmail(),
+                                                loginRequest.getPassword()));
+
+                String jwtToken = jwtUtils.generateToken(authentication);
+
+                Set<String> roleNames = user.getRoles().stream()
+                                .map(role -> role.getRoleName().toString())
+                                .collect(Collectors.toSet());
+
+                return new AuthResponseDTO(
+                                jwtToken,
+                                "Bearer",
+                                user.getUserId(),
+                                user.getUsername(),
+                                user.getEmail(),
+                                roleNames,
+                                "User logged in successfully");
         }
 
-        User user = new User();
-        user.setUsername(registerRequest.getUsername());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        public AuthResponseDTO register(RegisterRequestDTO registerRequest) {
+                if (userRepository.existsByEmail(registerRequest.getEmail())) {
+                        throw new RuntimeException("User already exists with email: " + registerRequest.getEmail());
+                }
 
-        Role customerRole = roleRepository.findByRoleName(RoleName.CUSTOMER)
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                if (userRepository.existsByUsername(registerRequest.getUsername())) {
+                        throw new RuntimeException(
+                                        "User already exists with username: " + registerRequest.getUsername());
+                }
 
-        Set<Role> roles = new HashSet<>();
-        roles.add(customerRole);
-        user.setRoles(roles);
+                User user = new User();
+                user.setUsername(registerRequest.getUsername());
+                user.setEmail(registerRequest.getEmail());
+                user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
-        User registeredUser = userRepository.save(user);
+                Role customerRole = roleRepository.findByRoleName(RoleName.CUSTOMER)
+                                .orElseThrow(() -> new RuntimeException("Default role not found"));
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        registerRequest.getEmail(),
-                        registerRequest.getPassword()
-                )
-        );
+                Set<Role> roles = new HashSet<>();
+                roles.add(customerRole);
+                user.setRoles(roles);
 
-        String jwtToken = jwtUtils.generateToken(authentication);
+                User registeredUser = userRepository.save(user);
 
-        return new AuthResponseDTO(
-                jwtToken,
-                "Bearer",
-                registeredUser.getUserId(),
-                registeredUser.getUsername(),
-                registeredUser.getEmail(),
-                Set.of(RoleName.CUSTOMER.toString()),
-                "User registered successfully"
-        );
-    }
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                registerRequest.getEmail(),
+                                                registerRequest.getPassword()));
 
-    public String getCurrentUserName(Authentication authentication) {
-        return (authentication != null) ? authentication.getName() : "";
-    }
+                String jwtToken = jwtUtils.generateToken(authentication);
 
-    public UserInfoResponse getUserDetails(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+                return new AuthResponseDTO(
+                                jwtToken,
+                                "Bearer",
+                                registeredUser.getUserId(),
+                                registeredUser.getUsername(),
+                                registeredUser.getEmail(),
+                                Set.of(RoleName.CUSTOMER.toString()),
+                                "User registered successfully");
+        }
 
-        List<String> roles = authentication.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+        public String getCurrentUserName(Authentication authentication) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                return userDetails.getUsername();
+        }
 
-        return new UserInfoResponse(user.getUserId(), user.getUsername(), roles);
-    }
+        public UserInfoResponse getUserDetails(Authentication authentication) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                User user = userRepository.findByEmail(userDetails.getUsername())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "User not found with email: " + userDetails.getUsername()));
 
-    public MessageResponse signoutUser() {
-        return new MessageResponse("You've been signed out!");
-    }
+                List<String> roles = authentication.getAuthorities().stream()
+                                .map(item -> item.getAuthority())
+                                .filter(auth -> auth.startsWith("ROLE_"))
+                                .collect(Collectors.toList());
+
+                return new UserInfoResponse(user.getUserId(), user.getUsername(), roles);
+        }
+
+        public MessageResponse signoutUser() {
+                return new MessageResponse("You've been signed out!");
+        }
 }

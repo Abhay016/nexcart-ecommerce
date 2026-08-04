@@ -23,6 +23,8 @@ public class CartItems {
     private Integer quantity;
     private Double productPrice;
 
+    private Double discount;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "cart_id")

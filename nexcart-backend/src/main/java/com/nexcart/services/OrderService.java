@@ -1,13 +1,9 @@
 package com.nexcart.services;
 
-import java.util.List;
-
-import com.nexcart.models.Order;
+import com.nexcart.dto.OrderDTO;
+import jakarta.transaction.Transactional;
 
 public interface OrderService {
-    Order placeOrder(Long userId, Long addressId);
-    List<Order> getOrdersByUserId(Long userId);
-    Order getOrderById(Long orderId);
-    Order updateOrderStatus(Long orderId, String orderStatus);
-    void cancelOrder(Long orderId);
+    @Transactional
+    OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgName, String pgPaymentId, String pgStatus, String pgResponseMessage);
 }

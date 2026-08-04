@@ -9,6 +9,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import java.util.ArrayList;
+import jakarta.persistence.OneToMany;
+
+
 
 @Entity
 @Table(name = "products")
@@ -30,4 +37,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<CartItems> products = new ArrayList<>();
+
 }
+

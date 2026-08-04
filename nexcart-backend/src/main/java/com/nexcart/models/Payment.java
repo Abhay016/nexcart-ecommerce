@@ -1,7 +1,8 @@
 package com.nexcart.models;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.CascadeType;
 
 @Entity
 @Table(name = "payments")
@@ -21,14 +21,24 @@ public class Payment {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
 
-    private String paymentMethod;
-    private Double amount;
-
-    @JsonIgnore
-    @OneToOne(mappedBy = "payment")
+    @OneToOne(mappedBy = "payment", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     private Order order;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @NotBlank
+    @Size(min = 4, message = "Payment method must contain at least 4 characters")
+    private String paymentMethod;
+	
+    private String pgPaymentId;
+    private String pgStatus;
+    private String pgResponseMessage;
+
+    private String pgName;
+
+    public Payment(String paymentMethod, String pgName, String pgPaymentId, String pgStatus, String pgResponseMessage) {
+        this.paymentMethod = paymentMethod;
+        this.pgName = pgName;
+        this.pgPaymentId = pgPaymentId;
+        this.pgStatus = pgStatus;
+        this.pgResponseMessage = pgResponseMessage;
+    }
 }

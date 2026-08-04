@@ -12,59 +12,62 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.nexcart.dto.APIResponseDTO;
-import com.nexcart.dto.AddressRequestDTO;
-import com.nexcart.models.Address;
+import com.nexcart.models.User;
+import com.nexcart.dto.AddressDTO;
 import com.nexcart.services.AddressService;
-
+import com.nexcart.utils.AuthUtils;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
 public class AddressController {
 
-    private final AddressService addressService;
+    AuthUtils authUtils;
 
-    public AddressController(AddressService addressService) {
+    AddressService addressService;
+
+    public AddressController(AuthUtils authUtils, AddressService addressService) {
+        this.authUtils = authUtils;
         this.addressService = addressService;
     }
 
     @PostMapping("/addresses")
-    public ResponseEntity<Address> createAddress(@Valid @RequestBody AddressRequestDTO request) {
-        Address address = new Address();
-        address.setBuildingName(request.getBuildingName());
-        address.setStreet(request.getStreet());
-        address.setCity(request.getCity());
-        address.setState(request.getState());
-        address.setCountry(request.getCountry());
-        address.setPincode(request.getPincode());
-
-        Address savedAddress = addressService.createAddress(request.getUserId(), address);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedAddress);
+    public ResponseEntity<AddressDTO> createAddress(@Valid @RequestBody AddressDTO addressDTO){
+        User user = authUtils.loggedInUser();
+        AddressDTO savedAddressDTO = addressService.createAddress(addressDTO, user);
+        return new ResponseEntity<>(savedAddressDTO, HttpStatus.CREATED);
     }
 
-    @GetMapping("/addresses/{userId}")
-    public ResponseEntity<List<Address>> getAddressesByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(addressService.getAddressesByUserId(userId));
+    @GetMapping("/addresses")
+    public ResponseEntity<List<AddressDTO>> getAddresses(){
+        List<AddressDTO> addressList = addressService.getAddresses();
+        return new ResponseEntity<>(addressList, HttpStatus.OK);
+    }
+
+    @GetMapping("/addresses/{addressId}")
+    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Long addressId){
+        AddressDTO addressDTO = addressService.getAddressesById(addressId);
+        return new ResponseEntity<>(addressDTO, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/users/addresses")
+    public ResponseEntity<List<AddressDTO>> getUserAddresses(){
+        User user = authUtils.loggedInUser();
+        List<AddressDTO> addressList = addressService.getUserAddresses(user);
+        return new ResponseEntity<>(addressList, HttpStatus.OK);
     }
 
     @PutMapping("/addresses/{addressId}")
-    public ResponseEntity<Address> updateAddress(@PathVariable Long addressId, @Valid @RequestBody AddressRequestDTO request) {
-        Address address = new Address();
-        address.setBuildingName(request.getBuildingName());
-        address.setStreet(request.getStreet());
-        address.setCity(request.getCity());
-        address.setState(request.getState());
-        address.setCountry(request.getCountry());
-        address.setPincode(request.getPincode());
-
-        return ResponseEntity.ok(addressService.updateAddress(addressId, address));
+    public ResponseEntity<AddressDTO> updateAddress(@PathVariable Long addressId
+            , @RequestBody AddressDTO addressDTO){
+        AddressDTO updatedAddress = addressService.updateAddress(addressId, addressDTO);
+        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
     }
 
     @DeleteMapping("/addresses/{addressId}")
-    public ResponseEntity<APIResponseDTO> deleteAddress(@PathVariable Long addressId) {
-        addressService.deleteAddress(addressId);
-        return ResponseEntity.ok(new APIResponseDTO("Address deleted successfully", true));
+    public ResponseEntity<String> updateAddress(@PathVariable Long addressId){
+        String status = addressService.deleteAddress(addressId);
+        return new ResponseEntity<>(status, HttpStatus.OK);
     }
 }

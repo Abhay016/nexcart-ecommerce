@@ -22,6 +22,7 @@ public class OrderItems {
 
     private Integer quantity;
     private Double orderedProductPrice;
+    private Double discount;
 
     @JsonIgnore
     @ManyToOne

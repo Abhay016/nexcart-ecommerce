@@ -1,12 +1,20 @@
 package com.nexcart.services;
 
-import com.nexcart.models.Cart;
+import com.nexcart.dto.CartDTO;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 public interface CartService {
-    Cart createCart(Long userId);
-    Cart getCartByUserId(Long userId);
-    Cart addItemToCart(Long cartId, Long productId, Integer quantity);
-    Cart updateCartItemQuantity(Long cartId, Long cartItemId, Integer quantity);
-    void removeCartItem(Long cartId, Long cartItemId);
-    Cart getCartById(Long cartId);
+    CartDTO addProductToCart(Long productId, Integer quantity);
+
+    List<CartDTO> getAllCarts();
+
+    CartDTO getCart(String emailId, Long cartId);
+
+    @Transactional
+    CartDTO updateProductQuantityInCart(Long productId, Integer quantity);
+
+    String deleteProductFromCart(Long cartId, Long productId);
+
+    void updateProductInCarts(Long cartId, Long productId);
 }

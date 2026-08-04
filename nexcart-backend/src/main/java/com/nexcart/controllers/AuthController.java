@@ -71,7 +71,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.getUserDetails(authentication));
     }
 
-    @PostMapping("/signout")
+    @PostMapping("/logout")
     public ResponseEntity<MessageResponse> signoutUser() {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok()

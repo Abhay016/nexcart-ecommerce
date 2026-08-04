@@ -8,6 +8,10 @@ public class APIException extends RuntimeException {
         this.status = status;
     }
 
+    public APIException(String message) {
+        super(message);
+    }
+
     public int getStatus() {
         return status;
     }

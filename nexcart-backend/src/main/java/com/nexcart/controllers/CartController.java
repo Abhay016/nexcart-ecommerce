@@ -7,17 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.nexcart.dto.APIResponseDTO;
-import com.nexcart.dto.CartItemRequestDTO;
-import com.nexcart.dto.CartRequestDTO;
+import com.nexcart.repositories.CartRepository;
+import com.nexcart.utils.AuthUtils;
+import com.nexcart.dto.CartDTO;
 import com.nexcart.models.Cart;
 import com.nexcart.services.CartService;
-
-import jakarta.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -25,36 +22,56 @@ public class CartController {
 
     private final CartService cartService;
 
-    public CartController(CartService cartService) {
+    private final CartRepository cartRepository;
+
+    private final AuthUtils authUtils;
+
+    public CartController(CartService cartService, CartRepository cartRepository, AuthUtils authUtils) {
         this.cartService = cartService;
+        this.authUtils = authUtils;
+        this.cartRepository = cartRepository;
     }
 
-    @PostMapping("/cart")
-    public ResponseEntity<Cart> createCart(@Valid @RequestBody CartRequestDTO request) {
-        Cart cart = cartService.createCart(request.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(cart);
+   
+   @PostMapping("/carts/products/{productId}/quantity/{quantity}")
+    public ResponseEntity<CartDTO> addProductToCart(@PathVariable Long productId,
+                                                    @PathVariable Integer quantity){
+        CartDTO cartDTO = cartService.addProductToCart(productId, quantity);
+        return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.CREATED);
     }
 
-    @GetMapping("/cart/{userId}")
-    public ResponseEntity<Cart> getCart(@PathVariable Long userId) {
-        return ResponseEntity.ok(cartService.getCartByUserId(userId));
+    @GetMapping("/carts")
+    public ResponseEntity<List<CartDTO>> getCarts() {
+        List<CartDTO> cartDTOs = cartService.getAllCarts();
+        return new ResponseEntity<List<CartDTO>>(cartDTOs, HttpStatus.FOUND);
     }
 
-    @PostMapping("/cart/{cartId}/items")
-    public ResponseEntity<Cart> addItemToCart(@PathVariable Long cartId, @Valid @RequestBody CartItemRequestDTO request) {
-        Cart cart = cartService.addItemToCart(cartId, request.getProductId(), request.getQuantity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(cart);
+    @GetMapping("/carts/users/cart")
+    public ResponseEntity<CartDTO> getCartById(){
+        String emailId = authUtils.loggedInEmail();
+        Cart cart = cartRepository.findCartByEmail(emailId);
+        Long cartId = cart.getCartId();
+        CartDTO cartDTO = cartService.getCart(emailId, cartId);
+        return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
     }
 
-    @PutMapping("/cart/{cartId}/items/{itemId}")
-    public ResponseEntity<Cart> updateCartItem(@PathVariable Long cartId, @PathVariable Long itemId, @Valid @RequestBody CartItemRequestDTO request) {
-        Cart cart = cartService.updateCartItemQuantity(cartId, itemId, request.getQuantity());
-        return ResponseEntity.ok(cart);
+    @PutMapping("/cart/products/{productId}/quantity/{operation}")
+    public ResponseEntity<CartDTO> updateCartProduct(@PathVariable Long productId,
+                                                     @PathVariable String operation) {
+
+        CartDTO cartDTO = cartService.updateProductQuantityInCart(productId,
+                operation.equalsIgnoreCase("delete") ? -1 : 1);
+
+        return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
     }
 
-    @DeleteMapping("/cart/{cartId}/items/{itemId}")
-    public ResponseEntity<APIResponseDTO> removeCartItem(@PathVariable Long cartId, @PathVariable Long itemId) {
-        cartService.removeCartItem(cartId, itemId);
-        return ResponseEntity.ok(new APIResponseDTO("Cart item removed successfully", true));
+    @DeleteMapping("/carts/{cartId}/product/{productId}")
+    public ResponseEntity<String> deleteProductFromCart(@PathVariable Long cartId,
+                                                        @PathVariable Long productId) {
+        String status = cartService.deleteProductFromCart(cartId, productId);
+
+        return new ResponseEntity<String>(status, HttpStatus.OK);
     }
+
+
 }
