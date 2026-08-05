@@ -100,7 +100,7 @@ public class CartServiceImpl implements CartService {
 
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
-        Set<CartItems> cartItems = cart.getCartItems();
+        List<CartItems> cartItems = cart.getCartItems();
 
         Stream<Product> productStream = cartItems.stream().map(item -> {
             Product map = modelMapper.map(item.getProduct(), Product.class);
@@ -207,14 +207,14 @@ public class CartServiceImpl implements CartService {
 
         CartItems updatedItem = cartItemsRepository.save(cartItem);
         if(updatedItem.getQuantity() == 0){
-            cartItemsRepository.deleteById(updatedItem.getCartItemId());
-            logger.info("Removed cart item {} because quantity reached zero", updatedItem.getCartItemId());
+            cartItemsRepository.deleteById(updatedItem.getId());
+            logger.info("Removed cart item {} because quantity reached zero", updatedItem.getId());
         }
 
 
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
-        Set<CartItems> cartItems = cart.getCartItems();
+        List<CartItems> cartItems = cart.getCartItems();
 
         Stream<Product> productStream = cartItems.stream().map(item -> {
             Product prd = modelMapper.map(item.getProduct(), Product.class);

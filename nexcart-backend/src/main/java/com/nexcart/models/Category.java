@@ -2,46 +2,41 @@ package com.nexcart.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "categories")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long categoryId;
 
-    @NotBlank(message = "Category name is required")
-    @Size(min = 2, message = "Category name must be at least 2 characters long")
-    @Column(nullable = false, unique = true)
+    @Size(min = 3, max = 20, message = "Category name must be between 3 and 20 characters")
+    @EqualsAndHashCode.Include
     private String categoryName;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Product> products;
-
+    @ToString.Exclude
     @JsonIgnore
-    public Long getId() {
-        return this.categoryId;
-    }
-
-    public void setId(Long id) {
-        this.categoryId = id;
-    }
-
+    private Set<Product> products;
 }

@@ -1,8 +1,8 @@
 package com.nexcart.controllers;
 
+import com.nexcart.dto.APIResponseDTO;
 import com.nexcart.dto.AuthResponseDTO;
 import com.nexcart.dto.LoginRequestDTO;
-import com.nexcart.dto.MessageResponse;
 import com.nexcart.dto.RegisterRequestDTO;
 import com.nexcart.dto.UserInfoResponse;
 import com.nexcart.security.JwtUtils;
@@ -84,10 +84,10 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<MessageResponse> signoutUser() {
-        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
+    public ResponseEntity<APIResponseDTO> signoutUser() {
+        APIResponseDTO apiResponseDTO = authService.signoutUser();
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(authService.signoutUser());
+                .header(HttpHeaders.SET_COOKIE, apiResponseDTO.getMessage())
+                .body(apiResponseDTO.isSuccess() ? new APIResponseDTO("Successfully signed out user", true) : apiResponseDTO);
     }
 }

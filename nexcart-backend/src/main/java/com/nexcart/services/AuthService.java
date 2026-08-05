@@ -1,8 +1,8 @@
 package com.nexcart.services;
 
+import com.nexcart.dto.APIResponseDTO;
 import com.nexcart.dto.AuthResponseDTO;
 import com.nexcart.dto.LoginRequestDTO;
-import com.nexcart.dto.MessageResponse;
 import com.nexcart.dto.RegisterRequestDTO;
 import com.nexcart.dto.UserInfoResponse;
 import com.nexcart.models.Role;
@@ -11,8 +11,8 @@ import com.nexcart.models.User;
 import com.nexcart.repositories.RoleRepository;
 import com.nexcart.repositories.UserRepository;
 import com.nexcart.security.JwtUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
-
-        private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
         private AuthenticationManager authenticationManager;
 
@@ -49,7 +47,6 @@ public class AuthService {
         }
 
         public AuthResponseDTO login(LoginRequestDTO loginRequest) {
-                logger.info("Authenticating login request for email: {}", loginRequest.getEmail());
                 User user = userRepository.findByEmail(loginRequest.getEmail())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "User not found with email: " + loginRequest.getEmail()));
@@ -65,7 +62,6 @@ public class AuthService {
                                 .map(role -> role.getRoleName().toString())
                                 .collect(Collectors.toSet());
 
-                logger.info("Login successful for user id {}, email {}", user.getUserId(), user.getEmail());
                 return new AuthResponseDTO(
                                 jwtToken,
                                 "Bearer",
@@ -77,14 +73,11 @@ public class AuthService {
         }
 
         public AuthResponseDTO register(RegisterRequestDTO registerRequest) {
-                logger.info("Creating new user registration for email: {}", registerRequest.getEmail());
                 if (userRepository.existsByEmail(registerRequest.getEmail())) {
-                        logger.warn("Registration failed: email already exists {}", registerRequest.getEmail());
                         throw new RuntimeException("User already exists with email: " + registerRequest.getEmail());
                 }
 
                 if (userRepository.existsByUsername(registerRequest.getUsername())) {
-                        logger.warn("Registration failed: username already exists {}", registerRequest.getUsername());
                         throw new RuntimeException(
                                         "User already exists with username: " + registerRequest.getUsername());
                 }
@@ -110,7 +103,6 @@ public class AuthService {
 
                 String jwtToken = jwtUtils.generateToken(authentication);
 
-                logger.info("Registration successful for user id {}, email {}", registeredUser.getUserId(), registeredUser.getEmail());
                 return new AuthResponseDTO(
                                 jwtToken,
                                 "Bearer",
@@ -123,13 +115,11 @@ public class AuthService {
 
         public String getCurrentUserName(Authentication authentication) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                logger.debug("Getting current user name: {}", userDetails.getUsername());
                 return userDetails.getUsername();
         }
 
         public UserInfoResponse getUserDetails(Authentication authentication) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                logger.info("Fetching user details for email: {}", userDetails.getUsername());
                 User user = userRepository.findByEmail(userDetails.getUsername())
                                 .orElseThrow(() -> new RuntimeException(
                                                 "User not found with email: " + userDetails.getUsername()));
@@ -142,7 +132,13 @@ public class AuthService {
                 return new UserInfoResponse(user.getUserId(), user.getUsername(), roles);
         }
 
-        public MessageResponse signoutUser() {
-                return new MessageResponse("You've been signed out!");
+        public APIResponseDTO signoutUser() {
+            try {
+                ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
+                return new APIResponseDTO(cookie.toString(), true);
+            } catch (Exception e) {
+                return new APIResponseDTO("Error signing out user: " + e.getMessage(), false);
+            }
         }
+        
 }

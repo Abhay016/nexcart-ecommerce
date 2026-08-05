@@ -12,7 +12,6 @@ import com.nexcart.models.Product;
 public class CartDTO {
 
     private Long cartId;
-    private Double productId;
     private Double totalPrice;
     private List<Product> products = new ArrayList<>();
 

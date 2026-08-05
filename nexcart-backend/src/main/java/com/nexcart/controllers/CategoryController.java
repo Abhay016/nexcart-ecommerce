@@ -44,7 +44,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/public/category/{id}")
+    @GetMapping("/public/categories/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
         logger.info("Fetching category by id={}", id);
         Category category = categoryService.getCategoryById(id);
@@ -63,7 +63,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/admin/category/{id}")
+    @PutMapping("/admin/categories/{id}")
     public ResponseEntity<APIResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
         logger.info("Updating category id {}", id);
         categoryService.updateCategory(id, category);
@@ -73,7 +73,7 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/admin/category/{id}")
+    @DeleteMapping("/admin/categories/{id}")
     public ResponseEntity<APIResponseDTO> deleteCategory(@PathVariable Long id) {
         logger.info("Deleting category id {}", id);
         categoryService.deleteCategory(id);

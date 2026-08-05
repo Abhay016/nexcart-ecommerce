@@ -43,7 +43,7 @@ public class AuthUtils {
         String email = authentication.getName();
         logger.debug("Resolving authenticated user entity for email: {}", email);
 
-        User user = userRepository.findByUsername(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + email));
         return user;
 

@@ -44,9 +44,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private Collection<GrantedAuthority> getAuthorities(User user) {
         Collection<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName().toString()))
+                .map(role -> "ROLE_" + role.getRoleName().toString())
+                .filter(role -> role.startsWith("ROLE_"))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        logger.debug("User email={} granted authorities={}", user.getEmail(), authorities);
+
+        logger.debug("User email={} mapped roles={} final authorities={}", 
+                    user.getEmail(), 
+                    user.getRoles().stream().map(r -> r.getRoleName()).toList(),
+                    authorities);
+
         return authorities;
     }
 }
