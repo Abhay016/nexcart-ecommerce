@@ -1,6 +1,8 @@
 package com.nexcart.services;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,8 @@ import com.nexcart.repositories.ProductRepository;
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
+
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
@@ -28,12 +32,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO<Product> getAllProducts(int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        logger.info("Fetching products page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Product> productPage = productRepository.findAll(pageable);
 
         List<Product> products = productPage.getContent();
         if (products.isEmpty()) {
+            logger.warn("No products found for the specified page criteria");
             throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
         }
 
@@ -43,12 +49,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProductById(Long productId) {
+        logger.info("Fetching product by id={}", productId);
         return productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
+                .orElseThrow(() -> {
+                    logger.warn("Product not found id={}", productId);
+                    return new ResourceNotFoundException("Product", "Product ID", productId);
+                });
     }
 
     @Override
     public ProductResponseDTO<Product> getProductsByCategory(long categoryId, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        logger.info("Fetching products for category {} page={} size={} sortBy={} direction={}", categoryId, pageNumber, pageSize, sortBy, sortDirection);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Category ID", categoryId));
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
@@ -57,6 +68,7 @@ public class ProductServiceImpl implements ProductService {
 
         List<Product> products = productPage.getContent();
         if (products.isEmpty()) {
+            logger.warn("No products found in category {}", categoryId);
             throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
         }
 
@@ -66,12 +78,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO<Product> searchProductByKeyword(String keyword, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        logger.info("Searching products by keyword='{}' page={} size={} sortBy={} direction={}", keyword, pageNumber, pageSize, sortBy, sortDirection);
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Product> productPage = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%', pageable);
 
         List<Product> products = productPage.getContent();
         if (products.isEmpty()) {
+            logger.warn("No products found matching keyword {}", keyword);
             throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
         }
 
@@ -81,10 +95,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public long addProduct(Product product, long categoryId) {
+        logger.info("Adding product '{}', categoryId={}", product.getProductName(), categoryId);
         validateProduct(product);
 
         String normalizedName = product.getProductName().trim();
         if (productRepository.findByProductName(normalizedName).isPresent()) {
+            logger.warn("Product creation failed, already exists: {}", normalizedName);
             throw new APIException("Product already exists", HttpStatus.CONFLICT.value());
         }
 
@@ -98,11 +114,13 @@ public class ProductServiceImpl implements ProductService {
                 ((product.getDiscount() * 0.01) * product.getPrice());
         product.setSpecialPrice(specialPrice);
         productRepository.save(product);
+        logger.debug("Product '{}' created with id {}", normalizedName, product.getProductId());
         return product.getProductId();
     }
 
     @Override
     public void updateProduct(Long productId, Product product) {
+        logger.info("Updating product id {}", productId);
         validateProduct(product);
 
         Product existingProduct = productRepository.findById(productId)
@@ -128,20 +146,25 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setQuantity(product.getQuantity());
         existingProduct.setCategory(category);
         productRepository.save(existingProduct);
+        logger.debug("Product updated id {}", productId);
     }
 
     @Override
     public void deleteProduct(Long productId) {
+        logger.info("Deleting product id {}", productId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
         productRepository.delete(product);
+        logger.debug("Product deleted id {}", productId);
     }
 
     private void validateProduct(Product product) {
         if (product == null || product.getProductName() == null || product.getProductName().trim().isEmpty()) {
+            logger.warn("Invalid product request: missing product name");
             throw new APIException("Product name is required", HttpStatus.BAD_REQUEST.value());
         }
         if (product.getPrice() == null) {
+            logger.warn("Invalid product request: missing price for product={}", product.getProductName());
             throw new APIException("Product price is required", HttpStatus.BAD_REQUEST.value());
         }
     }

@@ -4,6 +4,8 @@ package com.nexcart.services;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import com.nexcart.Exceptions.APIException;
@@ -23,6 +25,8 @@ import java.util.List;
 @Service
 public class CartServiceImpl implements CartService {
 
+    private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
+
     private final CartRepository cartRepository;
     private final CartItemsRepository cartItemsRepository;
     private final ProductRepository productRepository;
@@ -38,21 +42,25 @@ public class CartServiceImpl implements CartService {
     }
 
     private Cart createCart() {
-        Cart userCart  = cartRepository.findCartByEmail(authUtils.loggedInEmail());
-        if(userCart != null){
+        String email = authUtils.loggedInEmail();
+        Cart userCart  = cartRepository.findCartByEmail(email);
+        if (userCart != null) {
+            logger.debug("Existing cart found for user {}: cartId={}", email, userCart.getCartId());
             return userCart;
         }
 
+        logger.debug("Creating new cart for user {}", email);
         Cart cart = new Cart();
         cart.setTotalPrice(0.00);
         cart.setUser(authUtils.loggedInUser());
-        Cart newCart =  cartRepository.save(cart);
+        Cart newCart = cartRepository.save(cart);
 
+        logger.info("Created new cart {} for user {}", newCart.getCartId(), email);
         return newCart;
     }
    
     public CartDTO addProductToCart(Long productId, Integer quantity) {
-
+        logger.info("Adding product {} quantity {} to cart", productId, quantity);
         Cart cart  = createCart();
 
         Product product = productRepository.findById(productId)
@@ -88,6 +96,7 @@ public class CartServiceImpl implements CartService {
         cart.setTotalPrice(cart.getTotalPrice() + (product.getSpecialPrice() * quantity));
 
         cartRepository.save(cart);
+        logger.info("Product {} added to cart {} with quantity {}", productId, cart.getCartId(), quantity);
 
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
 
@@ -107,9 +116,11 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public List<CartDTO> getAllCarts() {
+        logger.info("Fetching all carts");
         List<Cart> carts = cartRepository.findAll();
 
         if (carts.size() == 0) {
+            logger.warn("No carts found in repository");
             throw new APIException("No cart exists");
         }
 
@@ -130,8 +141,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDTO getCart(String emailId, Long cartId) {
+        logger.info("Fetching cart {} for user {}", cartId, emailId);
         Cart cart = cartRepository.findCartByEmailAndCartId(emailId, cartId);
         if (cart == null){
+            logger.warn("Cart not found for cartId {} and email {}", cartId, emailId);
             throw new ResourceNotFoundException("Cart", "cartId", cartId);
         }
         CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
@@ -147,6 +160,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @Override
     public CartDTO updateProductQuantityInCart(Long productId, Integer quantity) {
+        logger.info("Updating quantity {} for product {} in cart", quantity, productId);
 
         String emailId = authUtils.loggedInEmail();
         Cart userCart = cartRepository.findCartByEmail(emailId);
@@ -194,6 +208,7 @@ public class CartServiceImpl implements CartService {
         CartItems updatedItem = cartItemsRepository.save(cartItem);
         if(updatedItem.getQuantity() == 0){
             cartItemsRepository.deleteById(updatedItem.getCartItemId());
+            logger.info("Removed cart item {} because quantity reached zero", updatedItem.getCartItemId());
         }
 
 
@@ -218,6 +233,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @Override
     public String deleteProductFromCart(Long cartId, Long productId) {
+        logger.info("Deleting product {} from cart {}", productId, cartId);
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart", "cartId", cartId));
 
@@ -231,7 +247,7 @@ public class CartServiceImpl implements CartService {
                 (cartItem.getProductPrice() * cartItem.getQuantity()));
 
         cartItemsRepository.deleteCartItemByProductIdAndCartId(cartId, productId);
-
+        logger.debug("Product {} removed from cart {}", productId, cartId);
         return "Product " + cartItem.getProduct().getProductName() + " removed from the cart !!!";
     }
 

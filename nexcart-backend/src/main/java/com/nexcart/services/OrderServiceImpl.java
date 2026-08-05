@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.nexcart.Exceptions.APIException;
 import com.nexcart.Exceptions.ResourceNotFoundException;
@@ -27,6 +29,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     CartRepository cartRepository;
 
@@ -59,8 +63,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgName, String pgPaymentId, String pgStatus, String pgResponseMessage) {
+        logger.info("Placing order for email={} addressId={} paymentMethod={}", emailId, addressId, paymentMethod);
         Cart cart = cartRepository.findCartByEmail(emailId);
         if (cart == null) {
+            logger.warn("Cart not found for email={}", emailId);
             throw new ResourceNotFoundException("Cart", "email", emailId);
         }
 
@@ -77,12 +83,15 @@ public class OrderServiceImpl implements OrderService {
         Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
         payment.setOrder(order);
         payment = paymentRepository.save(payment);
+        logger.debug("Payment saved with pgPaymentId={} status={}", pgPaymentId, pgStatus);
         order.setPayment(payment);
 
         Order savedOrder = orderRepository.save(order);
+        logger.debug("Order entity saved for email={} totalAmount={}", emailId, order.getTotalAmount());
 
         Set<CartItems> cartItems = cart.getCartItems();
         if (cartItems.isEmpty()) {
+            logger.warn("Cannot place order because cart is empty for email={}", emailId);
             throw new APIException("Cart is empty");
         }
 
@@ -98,10 +107,13 @@ public class OrderServiceImpl implements OrderService {
         }
 
         orderItems = orderItemRepository.saveAll(orderItems);
+        logger.debug("Saved {} order items for orderId={}", orderItems.size(), savedOrder.getOrderId());
 
         cart.getCartItems().forEach(item -> {
             int quantity = item.getQuantity();
             Product product = item.getProduct();
+
+            logger.debug("Processing order item productId={} quantity={}", product.getProductId(), quantity);
 
             // Reduce stock quantity
             product.setQuantity(product.getQuantity() - quantity);
@@ -117,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
         orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
 
         orderDTO.setAddressId(addressId);
+        logger.info("Order placed successfully for email={} orderId={}", emailId, savedOrder.getOrderId());
 
         return orderDTO;
     }

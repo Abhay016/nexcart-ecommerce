@@ -3,12 +3,16 @@ package com.nexcart.config;
 import com.nexcart.models.Role;
 import com.nexcart.models.RoleName;
 import com.nexcart.repositories.RoleRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
     private RoleRepository roleRepository;
 
@@ -18,7 +22,7 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // Create default roles
+        logger.info("Initializing default roles on startup");
         if (roleRepository.count() == 0) {
             Role adminRole = new Role();
             adminRole.setRoleId(1);
@@ -33,7 +37,9 @@ public class DataInitializer implements CommandLineRunner {
             sellerRole.setRoleName(RoleName.SELLER);
 
             roleRepository.saveAll(Arrays.asList(adminRole, customerRole, sellerRole));
-            System.out.println("Default roles initialized successfully!");
+            logger.info("Default roles initialized successfully");
+        } else {
+            logger.info("Default roles already exist, count={}", roleRepository.count());
         }
     }
 }

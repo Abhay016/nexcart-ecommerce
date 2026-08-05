@@ -1,4 +1,6 @@
 package com.nexcart.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,11 @@ import com.nexcart.dto.APIResponseDTO;
 @RestControllerAdvice
 public class MyGlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(MyGlobalExceptionHandler.class);
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation error: {}", ex.getMessage());
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
@@ -20,6 +25,7 @@ public class MyGlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<APIResponseDTO> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        logger.warn("Resource not found: {}", ex.getMessage());
         APIResponseDTO response = new APIResponseDTO(ex.getMessage(), false);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }

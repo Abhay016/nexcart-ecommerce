@@ -39,7 +39,7 @@ public class User {
     private Set<Order> orders;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Cart> carts;
+    private Cart cart;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

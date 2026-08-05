@@ -17,10 +17,14 @@ import com.nexcart.models.Product;
 import com.nexcart.config.AppConstants;
 import com.nexcart.dto.APIResponseDTO;
 import com.nexcart.dto.ProductResponseDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
 public class ProductController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     private final ProductService productService;
 
@@ -34,13 +38,17 @@ public class ProductController {
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
+        logger.info("Fetching all products page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection);
+        logger.debug("Fetched {} products", productResponse.getContent().size());
         return ResponseEntity.ok(productResponse);
     }
 
     @GetMapping("/public/products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        logger.info("Fetching product by id={}", id);
         Product product = productService.getProductById(id);
+        logger.debug("Product {} retrieved", id);
         return ResponseEntity.ok(product);
     }
 
@@ -51,7 +59,9 @@ public class ProductController {
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
+        logger.info("Fetching products for category {} page={} size={} sortBy={} direction={}", categoryId, pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortDirection);
+        logger.debug("Fetched {} products for category {}", productResponse.getContent().size(), categoryId);
         return ResponseEntity.ok(productResponse);
     }
 
@@ -61,14 +71,18 @@ public class ProductController {
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection){
+        logger.info("Searching products by keyword '{}' page={} size={} sortBy={} direction={}", keyword, pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.searchProductByKeyword(keyword, pageNumber, pageSize, sortBy, sortDirection);
+        logger.debug("Search returned {} products for keyword {}", productResponse.getContent().size(), keyword);
         return ResponseEntity.ok(productResponse);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<APIResponseDTO> addProduct(@Valid @RequestBody Product product, @PathVariable Long categoryId) {
+        logger.info("Adding new product '{}' under category {}", product.getProductName(), categoryId);
         long id = productService.addProduct(product, categoryId);
+        logger.debug("Product created with id {}", id);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " created successfully", true);
         return ResponseEntity.status(201).body(response);
     }
@@ -76,7 +90,9 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> updateProduct(@PathVariable Long id, @Valid @RequestBody Product product) {
+        logger.info("Updating product id {}", id);
         productService.updateProduct(id, product);
+        logger.debug("Product {} updated successfully", id);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " updated successfully", true);
         return ResponseEntity.ok(response);
     }
@@ -84,7 +100,9 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/products/{id}")
     public ResponseEntity<APIResponseDTO> deleteProduct(@PathVariable Long id) {
+        logger.info("Deleting product id {}", id);
         productService.deleteProduct(id);
+        logger.debug("Product {} deleted successfully", id);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " deleted successfully", true);
         return ResponseEntity.ok(response);
     }

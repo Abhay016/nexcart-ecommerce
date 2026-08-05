@@ -1,5 +1,7 @@
 package com.nexcart.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,8 @@ import com.nexcart.dto.OrderDTO;
 @RequestMapping("/api")
 public class OrderController {
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+
     private OrderService orderService;
 
     private AuthUtils authUtils;
@@ -28,6 +32,7 @@ public class OrderController {
     @PostMapping("/order/users/payments/{paymentMethod}")
     public ResponseEntity<OrderDTO> orderProducts(@PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
         String emailId = authUtils.loggedInEmail();
+        logger.info("Placing order for user {} via payment method {}", emailId, paymentMethod);
         OrderDTO order = orderService.placeOrder(
                 emailId,
                 orderRequestDTO.getAddressId(),
@@ -37,6 +42,7 @@ public class OrderController {
                 orderRequestDTO.getPgStatus(),
                 orderRequestDTO.getPgResponseMessage()
         );
+        logger.debug("Order placed successfully for user {} with total {}", emailId, order.getTotalAmount());
         return new ResponseEntity<>(order, HttpStatus.CREATED);
     }
 

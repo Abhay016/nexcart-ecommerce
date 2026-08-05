@@ -41,6 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String token = jwtUtils.getJwtFromCookies(request);
+            logger.debug("Processing JWT filter for request {}", request.getRequestURI());
 
             if (token == null) {
                 String authHeader = request.getHeader(AUTHORIZATION_HEADER);
@@ -52,6 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (token != null && jwtUtils.validateToken(token)) {
                 Claims claims = jwtUtils.getClaimsFromToken(token);
                 String username = claims.getSubject();
+                logger.info("Authenticated request for user: {}", username);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 @SuppressWarnings("unchecked")
@@ -66,6 +68,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                logger.debug("No valid JWT token found for request {}", request.getRequestURI());
             }
         } catch (Exception ex) {
             logger.error("Cannot set user authentication: {}", ex.getMessage());

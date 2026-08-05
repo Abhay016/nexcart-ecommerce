@@ -39,12 +39,14 @@ public class JwtUtils {
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
+        logger.debug("Generating JWT token for username: {}", username);
         return generateTokenFromUsername(username, authentication.getAuthorities().stream()
                 .map(auth -> auth.getAuthority())
                 .toList());
     }
 
     public String generateTokenFromUsername(String username) {
+        logger.debug("Generating JWT token for username without roles: {}", username);
         return generateTokenFromUsername(username, List.of());
     }
 
@@ -66,7 +68,9 @@ public class JwtUtils {
 
     public String getJwtFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, jwtCookieName);
-        return cookie != null ? cookie.getValue() : null;
+        String token = cookie != null ? cookie.getValue() : null;
+        logger.debug("Retrieved JWT from cookie: {}", token != null ? "present" : "missing");
+        return token;
     }
 
     public ResponseCookie generateJwtCookie(String token) {
@@ -99,16 +103,18 @@ public class JwtUtils {
     }
 
     public boolean validateToken(String token) {
+        logger.debug("Validating JWT token");
         try {
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
+            logger.debug("JWT token successfully validated");
             return true;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
+            logger.warn("JWT token is expired: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         } catch (IllegalArgumentException e) {

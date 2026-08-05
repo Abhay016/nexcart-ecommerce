@@ -14,8 +14,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
 import java.util.ArrayList;
 import jakarta.persistence.OneToMany;
-
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "products")
@@ -38,6 +37,7 @@ public class Product {
     @JoinColumn(name = "category_id")
     private Category category;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CartItems> products = new ArrayList<>();
 
