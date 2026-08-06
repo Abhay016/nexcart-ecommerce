@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class AddressController {
     }
 
     @PostMapping("/addresses")
-    public ResponseEntity<AddressDTO> createAddress(@Valid @RequestBody AddressDTO addressDTO){
+    public ResponseEntity<AddressDTO> createAddress(@Valid @RequestBody AddressDTO addressDTO) {
         User user = authUtils.loggedInUser();
         logger.info("Creating address for user {}", user.getEmail());
         AddressDTO savedAddressDTO = addressService.createAddress(addressDTO, user);
@@ -44,24 +45,25 @@ public class AddressController {
         return new ResponseEntity<>(savedAddressDTO, HttpStatus.CREATED);
     }
 
-    @GetMapping("/addresses")
-    public ResponseEntity<List<AddressDTO>> getAddresses(){
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/addresses")
+    public ResponseEntity<List<AddressDTO>> getAddresses() {
         logger.info("Fetching all addresses");
         List<AddressDTO> addressList = addressService.getAddresses();
         logger.debug("Retrieved {} address records", addressList.size());
         return new ResponseEntity<>(addressList, HttpStatus.OK);
     }
 
-    @GetMapping("/addresses/{addressId}")
-    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Long addressId){
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/addresses/{addressId}")
+    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Long addressId) {
         logger.info("Fetching address by id {}", addressId);
         AddressDTO addressDTO = addressService.getAddressesById(addressId);
         return new ResponseEntity<>(addressDTO, HttpStatus.OK);
     }
 
-
     @GetMapping("/users/addresses")
-    public ResponseEntity<List<AddressDTO>> getUserAddresses(){
+    public ResponseEntity<List<AddressDTO>> getUserAddresses() {
         User user = authUtils.loggedInUser();
         logger.info("Fetching addresses for user {}", user.getEmail());
         List<AddressDTO> addressList = addressService.getUserAddresses(user);
@@ -70,19 +72,19 @@ public class AddressController {
     }
 
     @PutMapping("/addresses/{addressId}")
-    public ResponseEntity<AddressDTO> updateAddress(@PathVariable Long addressId
-            , @RequestBody AddressDTO addressDTO){
-        logger.info("Updating address id {}", addressId);
-        AddressDTO updatedAddress = addressService.updateAddress(addressId, addressDTO);
-        logger.debug("Address id {} updated successfully", addressId);
-        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
+    public ResponseEntity<AddressDTO> updateAddress(
+            @PathVariable Long addressId,
+            @RequestBody AddressDTO addressDTO) {
+        User user = authUtils.loggedInUser();
+        AddressDTO updatedAddress = addressService.updateAddress(user, addressId, addressDTO);
+        return ResponseEntity.ok(updatedAddress);
     }
 
     @DeleteMapping("/addresses/{addressId}")
-    public ResponseEntity<String> updateAddress(@PathVariable Long addressId){
-        logger.info("Deleting address id {}", addressId);
-        String status = addressService.deleteAddress(addressId);
-        logger.debug("Address id {} deletion status: {}", addressId, status);
-        return new ResponseEntity<>(status, HttpStatus.OK);
+    public ResponseEntity<String> deleteAddress(@PathVariable Long addressId) {
+        User user = authUtils.loggedInUser();
+        String status = addressService.deleteAddress(user, addressId);
+        return ResponseEntity.ok(status);
     }
+
 }

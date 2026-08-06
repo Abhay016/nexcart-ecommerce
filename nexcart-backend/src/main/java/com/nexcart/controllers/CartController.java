@@ -17,6 +17,7 @@ import com.nexcart.dto.CartDTO;
 import com.nexcart.models.Cart;
 import com.nexcart.services.CartService;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api")
@@ -44,7 +45,8 @@ public class CartController {
         return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.CREATED);
     }
 
-    @GetMapping("/carts")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/carts")
     public ResponseEntity<List<CartDTO>> getCarts() {
         logger.info("Received request to retrieve all carts");
         List<CartDTO> cartDTOs = cartService.getAllCarts();
@@ -73,11 +75,10 @@ public class CartController {
         return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.OK);
     }
 
-    @DeleteMapping("/carts/{cartId}/product/{productId}")
-    public ResponseEntity<String> deleteProductFromCart(@PathVariable Long cartId,
-                                                        @PathVariable Long productId) {
-        logger.info("Deleting product {} from cart {}", productId, cartId);
-        String status = cartService.deleteProductFromCart(cartId, productId);
+    @DeleteMapping("/cart/product/{productId}")
+    public ResponseEntity<String> deleteProductFromCart(@PathVariable Long productId) {
+        logger.info("Deleting product {} from cart {}", productId);
+        String status = cartService.deleteProductFromCart(productId);
         logger.debug("Delete product result: {}", status);
         return new ResponseEntity<String>(status, HttpStatus.OK);
     }

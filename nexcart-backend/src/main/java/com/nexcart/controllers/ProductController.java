@@ -36,7 +36,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO<Product>> getAllProducts(
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
         logger.info("Fetching all products page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection);
@@ -57,7 +57,7 @@ public class ProductController {
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
         logger.info("Fetching products for category {} page={} size={} sortBy={} direction={}", categoryId, pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortDirection);
@@ -69,7 +69,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDTO<Product>> getProductsByKeyword(@PathVariable String keyword,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
+            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection){
         logger.info("Searching products by keyword '{}' page={} size={} sortBy={} direction={}", keyword, pageNumber, pageSize, sortBy, sortDirection);
         ProductResponseDTO<Product> productResponse = productService.searchProductByKeyword(keyword, pageNumber, pageSize, sortBy, sortDirection);

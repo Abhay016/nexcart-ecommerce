@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
-import com.nexcart.models.Product;
 
 @Data
 @AllArgsConstructor
@@ -13,6 +12,6 @@ public class CartDTO {
 
     private Long cartId;
     private Double totalPrice;
-    private List<Product> products = new ArrayList<>();
+    private List<CartItemDTO> cartItems = new ArrayList<>();
 
 }

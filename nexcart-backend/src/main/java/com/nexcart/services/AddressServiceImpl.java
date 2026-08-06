@@ -3,7 +3,10 @@ package com.nexcart.services;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import com.nexcart.Exceptions.APIException;
 import com.nexcart.Exceptions.ResourceNotFoundException;
 import com.nexcart.models.Address;
 import com.nexcart.models.User;
@@ -23,7 +26,8 @@ public class AddressServiceImpl implements AddressService {
 
     UserRepository userRepository;
 
-    public AddressServiceImpl(AddressRepository addressRepository, ModelMapper modelMapper, UserRepository userRepository) {
+    public AddressServiceImpl(AddressRepository addressRepository, ModelMapper modelMapper,
+            UserRepository userRepository) {
         this.addressRepository = addressRepository;
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
@@ -71,11 +75,20 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public AddressDTO updateAddress(Long addressId, AddressDTO addressDTO) {
-        logger.info("Updating address id={}", addressId);
+    public AddressDTO updateAddress(User user, Long addressId, AddressDTO addressDTO) {
+        logger.info("Updating address id={} for user={}", addressId, user.getEmail());
+
         Address addressFromDatabase = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
 
+        // ✅ Ownership check
+        if (!addressFromDatabase.getUser().getUserId().equals(user.getUserId())) {
+            logger.warn("Unauthorized update attempt: user={} tried to update addressId={}", user.getEmail(),
+                    addressId);
+            throw new APIException("You are not allowed to update this address", HttpStatus.FORBIDDEN.value());
+        }
+
+        // Update fields
         addressFromDatabase.setCity(addressDTO.getCity());
         addressFromDatabase.setPincode(addressDTO.getPincode());
         addressFromDatabase.setState(addressDTO.getState());
@@ -84,29 +97,31 @@ public class AddressServiceImpl implements AddressService {
         addressFromDatabase.setBuildingName(addressDTO.getBuildingName());
 
         Address updatedAddress = addressRepository.save(addressFromDatabase);
-
-        User user = addressFromDatabase.getUser();
-        user.getAddresses().removeIf(address -> address.getAddressId().equals(addressId));
-        user.getAddresses().add(updatedAddress);
-        userRepository.save(user);
-        logger.debug("Address updated id={}", addressId);
+        logger.debug("Address updated successfully id={} for user={}", addressId, user.getEmail());
 
         return modelMapper.map(updatedAddress, AddressDTO.class);
     }
 
     @Override
-    public String deleteAddress(Long addressId) {
-        logger.info("Deleting address id={}", addressId);
+    public String deleteAddress(User user, Long addressId) {
+        logger.info("Deleting address id={} for user={}", addressId, user.getEmail());
+
         Address addressFromDatabase = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
 
-        User user = addressFromDatabase.getUser();
+        if (!addressFromDatabase.getUser().getUserId().equals(user.getUserId())) {
+            logger.warn("Unauthorized delete attempt: user={} tried to delete addressId={}", user.getEmail(),
+                    addressId);
+            throw new APIException("You are not allowed to delete this address", HttpStatus.FORBIDDEN.value());
+        }
+
         user.getAddresses().removeIf(address -> address.getAddressId().equals(addressId));
         userRepository.save(user);
 
         addressRepository.delete(addressFromDatabase);
-        logger.debug("Address deleted id={}", addressId);
+        logger.debug("Address deleted successfully id={} for user={}", addressId, user.getEmail());
 
         return "Address deleted successfully with addressId: " + addressId;
     }
+
 }
