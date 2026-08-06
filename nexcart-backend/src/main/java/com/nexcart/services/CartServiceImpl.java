@@ -16,7 +16,6 @@ import com.nexcart.repositories.CartItemsRepository;
 import com.nexcart.repositories.CartRepository;
 import com.nexcart.repositories.ProductRepository;
 import com.nexcart.utils.AuthUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
@@ -29,7 +28,6 @@ public class CartServiceImpl implements CartService {
     private final CartItemsRepository cartItemsRepository;
     private final ProductRepository productRepository;
     private final AuthUtils authUtils;
-    private final ModelMapper modelMapper = new ModelMapper();
 
     public CartServiceImpl(CartRepository cartRepository, CartItemsRepository cartItemsRepository,
                            ProductRepository productRepository, AuthUtils authutils) {

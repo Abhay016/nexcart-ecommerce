@@ -42,4 +42,11 @@ public class MyGlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<APIResponseDTO> handleGenericException(Exception ex) {
+        logger.error("An error occurred: {}", ex.getMessage(), ex);
+        APIResponseDTO response = new APIResponseDTO("An error occurred: " + ex.getMessage(), false);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
 }

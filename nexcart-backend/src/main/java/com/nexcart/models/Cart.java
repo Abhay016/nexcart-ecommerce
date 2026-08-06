@@ -1,7 +1,6 @@
 package com.nexcart.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.GeneratedValue;

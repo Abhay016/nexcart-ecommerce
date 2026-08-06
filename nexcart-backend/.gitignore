@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### environment variables
+.env
+
+# Logs
+*.log
+logs/
+
+# Ignore Postman files
+postman/
+

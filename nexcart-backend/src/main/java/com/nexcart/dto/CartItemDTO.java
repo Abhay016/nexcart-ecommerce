@@ -1,6 +1,5 @@
 package com.nexcart.dto;
 
-import com.nexcart.models.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
