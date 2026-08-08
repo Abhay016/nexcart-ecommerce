@@ -75,7 +75,7 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="bg-gray-100 text-center py-4 text-sm text-gray-600 border-t border-gray-200">
-        © 2026 NexCart. All rights reserved | Made with ❤️ by Archit
+        © 2026 NexCart. All rights reserved.
       </div>
     </footer>
   );

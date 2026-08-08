@@ -1,55 +1,74 @@
 const initialState = {
-    cart: [],
+    cartItems: [
+        {
+            cartItemId: 22,
+            productId: 17,
+            productName: "Summer Dress",
+            price: 1999.0,
+            specialPrice: 1499.25,
+            discount: 25.0,
+            cartQuantity: 2,
+        },
+        {
+            cartItemId: 23,
+            productId: 18,
+            productName: "Wireless Earbuds",
+            price: 129.0,
+            specialPrice: 99.0,
+            discount: 23.0,
+            cartQuantity: 1,
+        },
+    ],
     totalPrice: 0,
-    cartId: null,
-}
+    cartId: 2,
+};
 
 export const cartReducer = (state = initialState, action) => {
     switch (action.type) {
         case "ADD_CART":
             const productToAdd = action.payload;
-            const existingProduct = state.cart.find(
+            const existingItem = state.cartItems.find(
                 (item) => item.productId === productToAdd.productId
             );
 
-            if(existingProduct) {
-                const updatedCart = state.cart.map((item) => {
-                    if (item.productId === productToAdd.productId) {
-                        return productToAdd;
-                    } else {
-                        return item;
-                    }
-                });
+            if (existingItem) {
+                const updatedItems = state.cartItems.map((item) =>
+                    item.productId === productToAdd.productId
+                        ? { ...item, cartQuantity: productToAdd.cartQuantity }
+                        : item
+                );
 
                 return {
                     ...state,
-                    cart: updatedCart,
+                    cartItems: updatedItems,
                 };
             } else {
-                const newCart = [...state.cart, productToAdd];
                 return {
                     ...state,
-                    cart: newCart,
+                    cartItems: [...state.cartItems, productToAdd],
                 };
             }
+
         case "REMOVE_CART":
             return {
                 ...state,
-                cart: state.cart.filter(
+                cartItems: state.cartItems.filter(
                     (item) => item.productId !== action.payload.productId
                 ),
             };
+
         case "GET_USER_CART_PRODUCTS":
             return {
                 ...state,
-                cart: action.payload,
-                totalPrice: action.totalPrice,
-                cartId: action.cartId,
+                cartItems: action.payload.cartItems,
+                totalPrice: action.payload.totalPrice,
+                cartId: action.payload.cartId,
             };
+
         case "CLEAR_CART":
-            return { cart:[], totalPrice: 0, cartId: null};
+            return { cartItems: [], totalPrice: 0, cartId: null };
+
         default:
             return state;
     }
-    return state;
-}
+};

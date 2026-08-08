@@ -32,7 +32,7 @@ function App() {
         <Navbar isAuthenticated={isAuthenticated} />
         <PromoCarousel />
         {/* Add a main wrapper with padding-top */}
-        <main className="pt-[104px]">   {/* 16 = 64px, matches Navbar height */}
+        <main className="pt-[104px]">   
           <Routes>
             <Route path='/' element={<LandingPage />} />
             <Route path='/home' element={<Home />} />

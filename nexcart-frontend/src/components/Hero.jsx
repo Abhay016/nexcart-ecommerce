@@ -1,3 +1,5 @@
+import { bannerImageTwo } from "../utils/constant";
+
 export default function Hero() {
   return (
     <section className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white overflow-hidden">
@@ -37,7 +39,7 @@ export default function Hero() {
         {/* Right Image */}
         <div className="mt-12 md:mt-0 md:w-1/2 relative animate-slideUp">
           <img
-            src="/hero-image.png"
+            src={bannerImageTwo}
             alt="Shopping"
             className="rounded-xl shadow-2xl transform hover:scale-105 hover:-translate-y-1 transition-transform duration-500"
           />
