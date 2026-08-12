@@ -34,12 +34,14 @@ public class ProductController {
     
     @GetMapping("/public/products")
     public ResponseEntity<ProductResponseDTO<Product>> getAllProducts(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "category", required = false) String category,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
         logger.info("Fetching all products page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
-        ProductResponseDTO<Product> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection);
+        ProductResponseDTO<Product> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection, keyword, category);
         logger.debug("Fetched {} products", productResponse.getContent().size());
         return ResponseEntity.ok(productResponse);
     }

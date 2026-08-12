@@ -39,7 +39,7 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-20 bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 text-gray-800 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 text-gray-800 relative overflow-hidden">
       {/* Decorative background accents */}
       <div className="absolute inset-0">
         <div className="absolute -top-24 left-1/4 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
@@ -47,10 +47,16 @@ export default function Testimonials() {
       </div>
 
       <div className="container mx-auto px-6 text-center relative z-10">
-        <h2 className="text-4xl font-extrabold mb-12 drop-shadow-sm text-gray-900">
-          What Our Customers Say
+        {/* Heading */}
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 drop-shadow-sm text-gray-900">
+          What Our Shoppers Say
         </h2>
+        <p className="text-lg text-gray-600 mb-12">
+          Real experiences from our happy customers
+        </p>
+        <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-blue-400 mx-auto rounded-full mb-12"></div>
 
+        {/* Swiper */}
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -66,16 +72,20 @@ export default function Testimonials() {
         >
           {testimonials.map((t, i) => (
             <SwiperSlide key={i}>
-              <div className="bg-white/70 backdrop-blur-md rounded-xl p-8 shadow-md hover:shadow-xl hover:scale-105 transition-transform duration-300">
+              <div className="bg-white/80 backdrop-blur-md rounded-xl p-8 shadow-md hover:shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center">
                 {/* Avatar */}
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="w-16 h-16 rounded-full mx-auto mb-4 border-2 border-white shadow-md"
-                />
+                <div className="relative">
+                  <img
+                    src={t.avatar}
+                    alt={t.name}
+                    className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-pink-200 shadow-lg"
+                  />
+                </div>
 
                 {/* Quote */}
-                <p className="italic text-lg leading-relaxed text-gray-700">"{t.text}"</p>
+                <p className="italic text-lg leading-relaxed text-gray-700 max-w-xs">
+                  "{t.text}"
+                </p>
 
                 {/* Star Rating */}
                 <div className="flex justify-center mt-4 text-yellow-400">

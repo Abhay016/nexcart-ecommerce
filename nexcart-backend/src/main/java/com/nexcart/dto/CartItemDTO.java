@@ -21,6 +21,5 @@ public class CartItemDTO {
 
     private Double discount;
 
-    private Integer cartQuantity;
-
+    private Integer quantity;
 }

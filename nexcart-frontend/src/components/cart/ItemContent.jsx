@@ -2,7 +2,11 @@ import { useState } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import SetQuantity from "./SetQuantity";
 import { useDispatch } from "react-redux";
-import { decreaseCartQuantity, increaseCartQuantity, removeFromCart } from "../../store/actions";
+import {
+    decreaseCartQuantity,
+    increaseCartQuantity,
+    removeFromCart,
+} from "../../store/actions";
 import toast from "react-hot-toast";
 import { formatPrice } from "../../utils/formatPrice";
 import truncateText from "../../utils/truncateText";
@@ -17,17 +21,14 @@ const ItemContent = ({
     discount,
     specialPrice,
     cartId,
-  }) => {
+}) => {
     const [currentQuantity, setCurrentQuantity] = useState(quantity);
     const dispatch = useDispatch();
 
     const handleQtyIncrease = (cartItems) => {
-        dispatch(increaseCartQuantity(
-            cartItems,
-            toast,
-            currentQuantity,
-            setCurrentQuantity
-        ));
+        dispatch(
+            increaseCartQuantity(cartItems, toast, currentQuantity, setCurrentQuantity)
+        );
     };
 
     const handleQtyDecrease = (cartItems) => {
@@ -41,26 +42,72 @@ const ItemContent = ({
     const removeItemFromCart = (cartItems) => {
         dispatch(removeFromCart(cartItems, toast));
     };
-    
+
     return (
-        <div className="grid md:grid-cols-5 grid-cols-4 md:text-md text-sm gap-4   items-center  border border-slate-200  rounded-md  lg:px-4  py-4 p-2">
-            <div className="md:col-span-2 justify-self-start flex  flex-col gap-2 ">
-                <div className="flex md:flex-row flex-col lg:gap-4 sm:gap-3 gap-0 items-start ">
-                   <h3 className="lg:text-[17px] text-sm font-semibold text-slate-600">
-                    {truncateText(productName)}
-                   </h3>
-                </div>
+        <div className="flex flex-col md:grid md:grid-cols-5 items-center justify-between 
+                    bg-white border border-gray-200 rounded-xl shadow-sm 
+                    hover:shadow-md transition-shadow duration-300 p-4 mb-4">
 
-                <div className="md:w-36 sm:w-24 w-12">
-                    <img 
-                        src={`${import.meta.env.VITE_BACK_END_URL}/images/${image}`}
-                        alt={productName}
-                        className="md:h-36 sm:h-24 h-12 w-full object-cover rounded-md"/>
-                
-
-                <div className="flex items-start gap-5 mt-3">
+            {/* Product Info */}
+            <div className="md:col-span-2 flex items-start gap-4 w-full">
+                <img
+                    src={`${import.meta.env.VITE_BACK_END_URL}/images/${image}`}
+                    alt={productName}
+                    className="h-24 w-24 object-cover rounded-lg border border-gray-100 shadow-sm hover:scale-105 transition-transform duration-300"
+                />
+                <div className="flex flex-col justify-between">
+                    <h3 className="text-base font-semibold text-gray-800">
+                        {truncateText(productName)}
+                    </h3>
+                    <p className="text-xs text-gray-500 line-clamp-2">{description}</p>
+                    {discount && (
+                        <span className="mt-1 inline-block text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                            {discount}% OFF
+                        </span>
+                    )}
                     <button
-                        onClick={() => removeItemFromCart({
+                        onClick={() =>
+                            removeItemFromCart({
+                                image,
+                                productName,
+                                description,
+                                specialPrice,
+                                price,
+                                productId,
+                                quantity,
+                            })
+                        }
+                        className="mt-2 flex items-center justify-center gap-2 
+             text-xs sm:text-sm font-medium 
+             w-28 sm:w-32 py-2 
+             rounded-md 
+             bg-gradient-to-r from-red-500 to-rose-600 
+             text-white shadow-sm 
+             cursor-pointer
+             hover:bg-red-600 hover:shadow-lg hover:scale-[1.05] 
+             active:scale-[0.97] 
+             transition-all duration-300 ease-in-out"
+                    >
+                        <HiOutlineTrash size={16} />
+                        <span>Remove</span>
+                    </button>
+
+
+                </div>
+            </div>
+
+            {/* Price */}
+            <div className="justify-self-center text-sm md:text-base text-gray-700 font-semibold mt-4 md:mt-0">
+                {formatPrice(Number(specialPrice))}
+            </div>
+
+            {/* Quantity */}
+            <div className="justify-self-center mt-2 md:mt-0">
+                <SetQuantity
+                    quantity={currentQuantity}
+                    cardCounter={true}
+                    handleQtyIncrease={() =>
+                        handleQtyIncrease({
                             image,
                             productName,
                             description,
@@ -68,48 +115,28 @@ const ItemContent = ({
                             price,
                             productId,
                             quantity,
-                        })}
-                        className="flex items-center font-semibold space-x-2 px-4 py-1 text-xs border border-rose-600 text-rose-600 rounded-md hover:bg-red-50 transition-colors duration-200">
-                        <HiOutlineTrash size={16} className="text-rose-600"/>
-                        Remove
-                    </button>
-                    </div>
-                </div>
+                        })
+                    }
+                    handleQtyDecrease={() =>
+                        handleQtyDecrease({
+                            image,
+                            productName,
+                            description,
+                            specialPrice,
+                            price,
+                            productId,
+                            quantity,
+                        })
+                    }
+                />
             </div>
 
-            <div className="justify-self-center lg:text-[17px] text-sm text-slate-600 font-semibold">
-                {formatPrice(Number(specialPrice))}
-            </div>
-
-            <div className="justify-self-center">
-                <SetQuantity 
-                    quantity={currentQuantity}
-                    cardCounter={true}
-                    handeQtyIncrease={() => handleQtyIncrease({
-                        image,
-                        productName,
-                        description,
-                        specialPrice,
-                        price,
-                        productId,
-                        quantity,
-                    })}
-                    handleQtyDecrease={() => {handleQtyDecrease({
-                        image,
-                        productName,
-                        description,
-                        specialPrice,
-                        price,
-                        productId,
-                        quantity,
-                    })}}/>
-            </div>
-
-            <div className="justify-self-center lg:text-[17px] text-sm text-slate-600 font-semibold">
+            {/* Total */}
+            <div className="justify-self-center text-sm md:text-base text-gray-900 font-bold mt-2 md:mt-0">
                 {formatPrice(Number(currentQuantity) * Number(specialPrice))}
             </div>
         </div>
-    )
+    );
 };
 
 export default ItemContent;

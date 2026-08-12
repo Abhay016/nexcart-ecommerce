@@ -52,6 +52,7 @@ export const addToCart = (data, qty = 1, toast) =>
     (dispatch, getState) => {
         // Find the product
         const { products } = getState().products;
+        console.log(getState());
         const getProduct = products.find(
             (item) => item.productId === data.productId
         );
@@ -76,6 +77,7 @@ export const increaseCartQuantity =
     (dispatch, getState) => {
         // Find the product
         const { products } = getState().products;
+        console.log(getState());
         
         const getProduct = products.find(
             (item) => item.productId === data.productId
@@ -191,6 +193,7 @@ export const deleteUserAddress =
     (toast, addressId, setOpenDeleteModal) => async (dispatch, getState) => {
     try {
         dispatch({ type: "BUTTON_LOADER" });
+        console.log(addressId);
         await api.delete(`/addresses/${addressId}`);
         dispatch({ type: "IS_SUCCESS" });
         dispatch(getUserAddresses());
@@ -216,7 +219,7 @@ export const clearCheckoutAddress = () => {
 export const getUserAddresses = () => async (dispatch, getState) => {
     try {
         dispatch({ type: "IS_FETCHING" });
-        const { data } = await api.get(`/addresses`);
+        const { data } = await api.get(`/users/addresses`);
         dispatch({type: "USER_ADDRESS", payload: data});
         dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
@@ -265,10 +268,11 @@ export const getUserCart = () => async (dispatch, getState) => {
     try {
         dispatch({ type: "IS_FETCHING" });
         const { data } = await api.get('/carts/users/cart');
+        console.log(data);
         
         dispatch({
             type: "GET_USER_CART_PRODUCTS",
-            payload: data.products,
+            payload: data.cartItems,
             totalPrice: data.totalPrice,
             cartId: data.cartId
         })

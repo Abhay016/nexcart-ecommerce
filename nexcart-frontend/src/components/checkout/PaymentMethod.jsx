@@ -5,7 +5,10 @@ import { addPaymentMethod, createUserCart } from '../../store/actions';
 
 const PaymentMethod = () => {
     const dispatch = useDispatch();
-    const { paymentMethod } = useSelector((state) => state.payment);
+    const { paymentMethod } = useSelector((state) => {
+        console.log(state);
+        return state.payment;
+    });
     const { cart, cartId } = useSelector((state) => state.carts);
     const { isLoading, errorMessage } = useSelector((state) => state.errors);
 

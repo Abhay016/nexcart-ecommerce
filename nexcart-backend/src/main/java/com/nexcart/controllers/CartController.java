@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.nexcart.repositories.CartRepository;
 import com.nexcart.utils.AuthUtils;
 import com.nexcart.dto.CartDTO;
+import com.nexcart.dto.CartItemDTO;
 import com.nexcart.models.Cart;
 import com.nexcart.services.CartService;
 import java.util.List;
@@ -37,10 +39,15 @@ public class CartController {
         this.cartRepository = cartRepository;
     }
 
-   
+    @PostMapping("/cart/create")
+    public ResponseEntity<String> createOrUpdateCart(@RequestBody List<CartItemDTO> cartItems) {
+        String response = cartService.createOrUpdateCartWithItems(cartItems);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @PostMapping("/carts/products/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDTO> addProductToCart(@PathVariable Long productId,
-                                                    @PathVariable Integer quantity){
+            @PathVariable Integer quantity) {
         CartDTO cartDTO = cartService.addProductToCart(productId, quantity);
         return new ResponseEntity<CartDTO>(cartDTO, HttpStatus.CREATED);
     }
@@ -55,7 +62,7 @@ public class CartController {
     }
 
     @GetMapping("/carts/users/cart")
-    public ResponseEntity<CartDTO> getCartById(){
+    public ResponseEntity<CartDTO> getCartById() {
         String emailId = authUtils.loggedInEmail();
         logger.info("Retrieving cart for current user {}", emailId);
         Cart cart = cartRepository.findCartByEmail(emailId);
@@ -67,7 +74,7 @@ public class CartController {
 
     @PutMapping("/cart/products/{productId}/quantity/{operation}")
     public ResponseEntity<CartDTO> updateCartProduct(@PathVariable Long productId,
-                                                     @PathVariable String operation) {
+            @PathVariable String operation) {
         logger.info("Updating cart product {} with operation {}", productId, operation);
         CartDTO cartDTO = cartService.updateProductQuantityInCart(productId,
                 operation.equalsIgnoreCase("delete") ? -1 : 1);
@@ -82,6 +89,5 @@ public class CartController {
         logger.debug("Delete product result: {}", status);
         return new ResponseEntity<String>(status, HttpStatus.OK);
     }
-
 
 }

@@ -12,16 +12,18 @@ const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loader, setLoader] = useState(false);
-
+  
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     mode: "onTouched",
   });
-
+  
+  const watchPassword = watch("password");
   const registerHandler = async (data) => {
     dispatch(registerNewUser(data, toast, reset, navigate, setLoader));
   };
@@ -89,6 +91,7 @@ const Register = () => {
             placeholder="Re-enter your password"
             register={register}
             errors={errors}
+            watch={watchPassword}
           />
         </div>
 

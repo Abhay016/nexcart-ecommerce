@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressDTO {
+
+    private Long addressId;
+
     @NotBlank(message = "Building name is required")
     private String buildingName;
 

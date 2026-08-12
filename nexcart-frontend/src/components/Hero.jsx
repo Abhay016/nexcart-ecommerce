@@ -22,7 +22,7 @@ export default function Hero() {
           </p>
           <div className="flex space-x-4">
             <a
-              href="/shop"
+              href="/products"
               className="px-6 py-3 bg-gradient-to-r from-white to-gray-100 text-blue-700 font-semibold rounded-md shadow-md hover:scale-105 hover:shadow-xl transition-transform"
             >
               Start Shopping

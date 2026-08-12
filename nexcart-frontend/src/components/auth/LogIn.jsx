@@ -51,7 +51,7 @@ const LogIn = () => {
             label="Email"
             required
             id="email"
-            type="text"
+            type="email"
             message="*Email is required"
             placeholder="Enter your email"
             register={register}

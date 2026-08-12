@@ -65,18 +65,26 @@ const products = [
 
 export default function FeaturedProducts() {
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-indigo-50 via-violet-50 to-rose-50 relative overflow-hidden">
       {/* Decorative background accents */}
       <div className="absolute inset-0">
-        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-rose-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-12 text-center drop-shadow-sm">
-          Featured Products
-        </h2>
+        {/* Heading */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 drop-shadow-sm">
+            Featured Products
+          </h2>
+          <p className="mt-3 text-lg text-gray-600">
+            Handpicked items curated just for you
+          </p>
+          <div className="mt-6 w-24 h-1 bg-gradient-to-r from-indigo-400 to-rose-400 mx-auto rounded-full"></div>
+        </div>
 
+        {/* Swiper */}
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -92,10 +100,22 @@ export default function FeaturedProducts() {
         >
           {products.map((product) => (
             <SwiperSlide key={product.productId}>
-              <ProductCard {...product} />
+              <div className="transition-transform duration-300 hover:scale-105">
+                <ProductCard {...product} />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {/* CTA Button */}
+        <div className="text-center mt-12">
+          <a
+            href="/products"
+            className="inline-block px-6 py-3 rounded-md bg-gradient-to-r from-indigo-500 to-rose-500 text-white font-semibold shadow-md hover:scale-105 transition-transform duration-300"
+          >
+            View All Products
+          </a>
+        </div>
       </div>
     </section>
   );

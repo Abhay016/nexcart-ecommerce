@@ -64,6 +64,7 @@ public class SecurityConfig {
                 csrf.disable();
                 logger.debug("CSRF protection disabled (using JWT stateless authentication)");
             })
+            .cors(cors -> {})
             .sessionManagement(session -> {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 logger.debug("Session management set to STATELESS");

@@ -18,7 +18,6 @@ import com.nexcart.repositories.ProductRepository;
 import com.nexcart.utils.AuthUtils;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -35,6 +34,57 @@ public class CartServiceImpl implements CartService {
         this.cartItemsRepository = cartItemsRepository;
         this.productRepository = productRepository;
         this.authUtils = authutils;
+    }
+
+    @Transactional
+    @Override
+    public String createOrUpdateCartWithItems(List<CartItemDTO> cartItems) {
+        // Get user's email
+        String emailId = authUtils.loggedInEmail();
+        logger.info("Creating or updating cart for user {}", emailId);
+        // Check if an existing cart is available or create a new one
+        Cart existingCart = cartRepository.findCartByEmail(emailId);
+        if (existingCart == null) {
+            existingCart = new Cart();
+            existingCart.setTotalPrice(0.00);
+            existingCart.setUser(authUtils.loggedInUser());
+            existingCart = cartRepository.save(existingCart);
+        } else {
+            // Clear all current items in the existing cart
+            cartItemsRepository.deleteAllByCartId(existingCart.getCartId());
+        }
+
+        logger.info("Processing {} items for cart {}", cartItems.size(), existingCart.getCartId());
+
+        double totalPrice = 0.00;
+
+        // Process each item in the request to add to the cart
+        for (CartItemDTO cartItemDTO : cartItems) {
+            Long productId = cartItemDTO.getProductId();
+            Integer quantity = cartItemDTO.getQuantity();
+
+            // Find the product by ID
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+            // Directly update product stock and total price
+            // product.setQuantity(product.getQuantity() - quantity);
+            totalPrice += product.getSpecialPrice() * quantity;
+
+            // Create and save cart item
+            CartItems cartItem = new CartItems();
+            cartItem.setProduct(product);
+            cartItem.setCart(existingCart);
+            cartItem.setQuantity(quantity);
+            cartItem.setProductPrice(product.getSpecialPrice());
+            cartItem.setDiscount(product.getDiscount());
+            cartItemsRepository.save(cartItem);
+        }
+
+        // Update the cart's total price and save
+        existingCart.setTotalPrice(totalPrice);
+        cartRepository.save(existingCart);
+        return "Cart created/updated with the new items successfully";
     }
 
     private Cart createCart() {
@@ -220,7 +270,7 @@ public class CartServiceImpl implements CartService {
             dto.setPrice(item.getProduct().getPrice());
             dto.setSpecialPrice(item.getProduct().getSpecialPrice());
             dto.setDiscount(item.getProduct().getDiscount());
-            dto.setCartQuantity(item.getQuantity());
+            dto.setQuantity(item.getQuantity());
             return dto;
         }).toList();
 

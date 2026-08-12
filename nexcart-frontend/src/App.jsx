@@ -23,25 +23,29 @@ import Footer from './components/shared/Footer'
 import PromoCarousel from './components/shared/PromoCarousel'
 import { useSelector } from 'react-redux'
 import LandingPage from './components/LandingPage'
+import Faqs from './components/Faqs'
+import CustomerRoute from './components/CustomerRoute'
 
 function App() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   return (
     <React.Fragment>
-      <Router>  
+      <Router>
         <Navbar isAuthenticated={isAuthenticated} />
         <PromoCarousel />
         {/* Add a main wrapper with padding-top */}
-        <main className="pt-[104px]">   
+        <main className="pt-[104px]">
           <Routes>
             <Route path='/' element={<LandingPage />} />
             <Route path='/home' element={<Home />} />
             <Route path='/products' element={<Products />} />
             <Route path='/about' element={<About />} />
             <Route path='/contact' element={<Contact />} />
+            <Route path='/faqs' element={<Faqs />} />
             <Route path='/cart' element={<Cart />} />
 
-            <Route path='/' element={<PrivateRoute />}>
+
+            <Route path='/' element={<CustomerRoute />}>
               <Route path='/checkout' element={<Checkout />} />
               <Route path='/order-confirm' element={<PaymentConfirmation />} />
             </Route>

@@ -29,16 +29,24 @@ const categories = [
 
 export default function Categories() {
   return (
-    <section className="py-20 bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 relative overflow-hidden">
       {/* Decorative background shapes */}
-      <div className="absolute -top-20 -left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute -top-20 -left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-12 text-center drop-shadow-lg">
-          Shop by Category
-        </h2>
+        {/* Heading */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 drop-shadow-sm">
+            Shop by Category
+          </h2>
+          <p className="mt-3 text-lg text-gray-600">
+            Explore our curated collections across every lifestyle
+          </p>
+          <div className="mt-6 w-24 h-1 bg-gradient-to-r from-pink-400 to-blue-400 mx-auto rounded-full"></div>
+        </div>
 
+        {/* Swiper */}
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
           spaceBetween={30}
@@ -66,9 +74,12 @@ export default function Categories() {
                 />
 
                 {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition">
                   <span className="text-white text-2xl font-semibold tracking-wide">
                     {cat.name}
+                  </span>
+                  <span className="mt-2 text-sm text-gray-200">
+                    Discover latest {cat.name} trends
                   </span>
                 </div>
               </a>
