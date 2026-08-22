@@ -42,3 +42,5 @@ logs/
 # Ignore Postman files
 postman/
 
+
+uploads/

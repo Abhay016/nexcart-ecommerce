@@ -1,4 +1,4 @@
-package com.nexcart.Exceptions;
+package com.nexcart.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException {
     String resourceName;

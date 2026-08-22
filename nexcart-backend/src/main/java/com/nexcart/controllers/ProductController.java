@@ -11,14 +11,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.nexcart.services.ProductService;
 import jakarta.validation.Valid;
 import com.nexcart.models.Product;
-import com.nexcart.config.AppConstants;
+import com.nexcart.common.AppConstants;
 import com.nexcart.dto.APIResponseDTO;
 import com.nexcart.dto.ProductResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nexcart.dto.ProductDTO; 
 
 @RestController
 @RequestMapping("/api")
@@ -33,7 +36,7 @@ public class ProductController {
     }
     
     @GetMapping("/public/products")
-    public ResponseEntity<ProductResponseDTO<Product>> getAllProducts(
+    public ResponseEntity<ProductResponseDTO<ProductDTO>> getAllProducts(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "category", required = false) String category,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
@@ -41,40 +44,40 @@ public class ProductController {
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
         logger.info("Fetching all products page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
-        ProductResponseDTO<Product> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection, keyword, category);
+        ProductResponseDTO<ProductDTO> productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortDirection, keyword, category);
         logger.debug("Fetched {} products", productResponse.getContent().size());
         return ResponseEntity.ok(productResponse);
     }
 
     @GetMapping("/public/products/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
         logger.info("Fetching product by id={}", id);
-        Product product = productService.getProductById(id);
+        ProductDTO product = productService.getProductById(id);
         logger.debug("Product {} retrieved", id);
         return ResponseEntity.ok(product);
     }
 
-    @GetMapping("/public/categories/{categoryId}/products")
-    public ResponseEntity<ProductResponseDTO<Product>> getProductsByCategory(
-            @PathVariable Long categoryId,
+    @GetMapping("/public/categories/{categoryName}/products")
+    public ResponseEntity<ProductResponseDTO<ProductDTO>> getProductsByCategory(
+            @PathVariable String categoryName,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection) {
-        logger.info("Fetching products for category {} page={} size={} sortBy={} direction={}", categoryId, pageNumber, pageSize, sortBy, sortDirection);
-        ProductResponseDTO<Product> productResponse = productService.getProductsByCategory(categoryId, pageNumber, pageSize, sortBy, sortDirection);
-        logger.debug("Fetched {} products for category {}", productResponse.getContent().size(), categoryId);
+        logger.info("Fetching products for category {} page={} size={} sortBy={} direction={}", categoryName, pageNumber, pageSize, sortBy, sortDirection);
+        ProductResponseDTO<ProductDTO> productResponse = productService.getProductsByCategory(categoryName, pageNumber, pageSize, sortBy, sortDirection);
+        logger.debug("Fetched {} products for category {}", productResponse.getContent().size(), categoryName);
         return ResponseEntity.ok(productResponse);
     }
 
     @GetMapping("/public/products/keyword/{keyword}")
-    public ResponseEntity<ProductResponseDTO<Product>> getProductsByKeyword(@PathVariable String keyword,
+    public ResponseEntity<ProductResponseDTO<ProductDTO>> getProductsByKeyword(@PathVariable String keyword,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY_PRODUCTID) String sortBy,
             @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDirection){
         logger.info("Searching products by keyword '{}' page={} size={} sortBy={} direction={}", keyword, pageNumber, pageSize, sortBy, sortDirection);
-        ProductResponseDTO<Product> productResponse = productService.searchProductByKeyword(keyword, pageNumber, pageSize, sortBy, sortDirection);
+        ProductResponseDTO<ProductDTO> productResponse = productService.searchProductByKeyword(keyword, pageNumber, pageSize, sortBy, sortDirection);
         logger.debug("Search returned {} products for keyword {}", productResponse.getContent().size(), keyword);
         return ResponseEntity.ok(productResponse);
     }
@@ -107,5 +110,11 @@ public class ProductController {
         logger.debug("Product {} deleted successfully", id);
         APIResponseDTO response = new APIResponseDTO("Product with Id " + id + " deleted successfully", true);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("product/{id}/image")
+    public ResponseEntity<ProductDTO> uploadProductImage(@PathVariable Long id, @RequestParam("image") MultipartFile image) {
+        ProductDTO product = productService.uploadProductImage(id, image);
+        return ResponseEntity.ok(product);
     }
 }

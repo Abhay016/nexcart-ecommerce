@@ -6,14 +6,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.nexcart.Exceptions.APIException;
-import com.nexcart.Exceptions.ResourceNotFoundException;
 import com.nexcart.models.Address;
 import com.nexcart.models.User;
 import com.nexcart.repositories.AddressRepository;
 import com.nexcart.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import com.nexcart.dto.AddressDTO;
+import com.nexcart.exceptions.APIException;
+import com.nexcart.exceptions.ResourceNotFoundException;
 
 @Service
 public class AddressServiceImpl implements AddressService {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nexcart.services.CategoryService;
 import jakarta.validation.Valid;
 import com.nexcart.models.Category;
-import com.nexcart.config.AppConstants;
+import com.nexcart.common.AppConstants;
 import com.nexcart.dto.APIResponseDTO;
 import com.nexcart.dto.CategoryResponseDTO;
 

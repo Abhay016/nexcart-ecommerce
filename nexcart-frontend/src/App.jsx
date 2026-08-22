@@ -22,9 +22,15 @@ import Orders from './components/admin/orders/Orders'
 import Footer from './components/shared/Footer'
 import PromoCarousel from './components/shared/PromoCarousel'
 import { useSelector } from 'react-redux'
-import LandingPage from './components/LandingPage'
+import LandingPage from './components/landingPage/LandingPage'
 import Faqs from './components/Faqs'
 import CustomerRoute from './components/CustomerRoute'
+import ProfilePage from './components/profile/ProfilePage'
+import OrderPage from './components/order/OrderPage'
+import ProductPage from './components/productPage/ProductPage'
+import WishlistPage from './components/wishlist/WishlistPage'
+import DealsPage from './components/deals/DealsPage'
+import ForgotPassword from './components/auth/ForgotPassword'
 
 function App() {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -39,10 +45,16 @@ function App() {
             <Route path='/' element={<LandingPage />} />
             <Route path='/home' element={<Home />} />
             <Route path='/products' element={<Products />} />
+            <Route path='deals' element={<DealsPage/>} />
             <Route path='/about' element={<About />} />
             <Route path='/contact' element={<Contact />} />
             <Route path='/faqs' element={<Faqs />} />
             <Route path='/cart' element={<Cart />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<OrderPage />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
 
 
             <Route path='/' element={<CustomerRoute />}>

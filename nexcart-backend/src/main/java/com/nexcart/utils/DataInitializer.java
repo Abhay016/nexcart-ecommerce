@@ -1,4 +1,4 @@
-package com.nexcart.config;
+package com.nexcart.utils;
 
 import com.nexcart.models.Role;
 import com.nexcart.models.RoleName;

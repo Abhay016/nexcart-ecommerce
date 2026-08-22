@@ -23,6 +23,24 @@ export const fetchProducts = (queryString) => async (dispatch) => {
     }
 };
 
+export const fetchProductById = (id) => async (dispatch) => {
+    try {
+        dispatch({ type: "IS_FETCHING" });
+        const { data } = await api.get(`/public/products/${id}`);
+        dispatch({
+            type: "FETCH_PRODUCT_BY_ID",
+            payload: data
+        });
+        dispatch({ type: "IS_SUCCESS" });
+    } catch (error) {
+        console.log(error);
+        dispatch({ 
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "Failed to fetch product by Id",
+         });
+    }
+};
+
 
 export const fetchCategories = () => async (dispatch) => {
     try {
@@ -91,7 +109,7 @@ export const increaseCartQuantity =
 
             dispatch({
                 type: "ADD_CART",
-                payload: {...data, quantity: newQuantity + 1 },
+                payload: {...data, quantity: newQuantity },
             });
             localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart));
         } else {
@@ -626,3 +644,42 @@ export const addNewDashboardSeller =
       setOpen(false);
     }
   };
+
+export const fetchReviewsByProduct = (productId) => async (dispatch) => {
+  try {
+    dispatch({ type: "IS_FETCHING" });
+    const { data } = await api.get(`/reviews/product/${productId}`);
+    dispatch({ type: "FETCH_REVIEWS_BY_PRODUCT", payload: data });
+    dispatch({ type: "IS_SUCCESS" });
+  } catch (err) {
+    console.log(err);
+    dispatch({
+      type: "IS_ERROR",
+      payload: err?.response?.data?.message || "Failed to fetch reviews data",
+    });
+  }
+}
+
+export const fetchRelatedProducts = (categoryName) => async (dispatch) => {
+  try {
+    console.log(categoryName);
+    dispatch({ type: "IS_FETCHING" });
+    const { data } = await api.get(`/public/categories/${categoryName}/products`);
+    console.log(data);
+    dispatch({
+        type: "FETCH_RELATED_PRODUCTS",
+        payload: data.content,
+        pageNumber: data.pageNumber,
+        pageSize: data.pageSize,
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        lastPage: data.lastPage,
+    });
+    dispatch({ type: "IS_SUCCESS" });
+  } catch (error) {
+    dispatch({
+      type: "IS_ERROR",
+      payload: error?.response?.data?.message || "Failed to fetch related products",
+    });
+  }
+};

@@ -39,11 +39,11 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-20 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 text-gray-800 relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-indigo-50 via-violet-50 to-rose-50 text-gray-800 relative overflow-hidden">
       {/* Decorative background accents */}
       <div className="absolute inset-0">
-        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute -top-24 left-1/4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-rose-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
       </div>
 
       <div className="container mx-auto px-6 text-center relative z-10">
@@ -54,7 +54,7 @@ export default function Testimonials() {
         <p className="text-lg text-gray-600 mb-12">
           Real experiences from our happy customers
         </p>
-        <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-blue-400 mx-auto rounded-full mb-12"></div>
+        <div className="w-28 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500 mx-auto rounded-full mb-12 animate-pulse"></div>
 
         {/* Swiper */}
         <Swiper
@@ -72,19 +72,17 @@ export default function Testimonials() {
         >
           {testimonials.map((t, i) => (
             <SwiperSlide key={i}>
-              <div className="bg-white/80 backdrop-blur-md rounded-xl p-8 shadow-md hover:shadow-xl hover:scale-105 transition-transform duration-300 flex flex-col items-center">
+              <div className="bg-white/90 backdrop-blur-md rounded-xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-300 flex flex-col items-center">
                 {/* Avatar */}
-                <div className="relative">
-                  <img
-                    src={t.avatar}
-                    alt={t.name}
-                    className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-pink-200 shadow-lg"
-                  />
-                </div>
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-indigo-200 shadow-md"
+                />
 
                 {/* Quote */}
-                <p className="italic text-lg leading-relaxed text-gray-700 max-w-xs">
-                  "{t.text}"
+                <p className="italic text-lg leading-relaxed text-gray-700 max-w-sm">
+                  “{t.text}”
                 </p>
 
                 {/* Star Rating */}
@@ -103,7 +101,7 @@ export default function Testimonials() {
 
                 {/* Name & Role */}
                 <h4 className="mt-6 font-semibold text-xl text-gray-900">{t.name}</h4>
-                <p className="text-sm text-gray-600">{t.role}</p>
+                <p className="text-sm text-gray-500">{t.role}</p>
               </div>
             </SwiperSlide>
           ))}

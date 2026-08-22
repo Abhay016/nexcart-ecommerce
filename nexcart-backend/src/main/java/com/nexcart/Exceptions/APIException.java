@@ -1,4 +1,4 @@
-package com.nexcart.Exceptions;
+package com.nexcart.exceptions;
 
 public class APIException extends RuntimeException {
     private int status;

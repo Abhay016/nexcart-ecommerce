@@ -1,4 +1,4 @@
-package com.nexcart.config;
+package com.nexcart.common;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AppConfig {
+public class ModelMapperClass {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModelMapperClass.class);
 
     @Bean
     public ModelMapper modelMapper() {

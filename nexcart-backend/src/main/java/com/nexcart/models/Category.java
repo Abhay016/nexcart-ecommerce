@@ -35,8 +35,11 @@ public class Category {
     @EqualsAndHashCode.Include
     private String categoryName;
 
+    private String categoryImage;
+
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     private Set<Product> products;
+
 }

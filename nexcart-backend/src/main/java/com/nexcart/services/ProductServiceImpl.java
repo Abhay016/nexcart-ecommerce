@@ -1,19 +1,28 @@
 package com.nexcart.services;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-
-import com.nexcart.Exceptions.APIException;
-import com.nexcart.Exceptions.ResourceNotFoundException;
+import com.nexcart.dto.ProductDTO;
 import com.nexcart.dto.ProductResponseDTO;
+import com.nexcart.exceptions.APIException;
+import com.nexcart.exceptions.ResourceNotFoundException;
 import com.nexcart.models.Product;
 import com.nexcart.models.Category;
 import com.nexcart.repositories.CategoryRepository;
@@ -27,17 +36,20 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
     }
 
     @Override
-    public ProductResponseDTO<Product> getAllProducts(int pageNumber, int pageSize, String sortBy, String sortDirection, String keyword, String category) {
-        logger.info("Fetching all products: page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
+    public ProductResponseDTO<ProductDTO> getAllProducts(int pageNumber, int pageSize, String sortBy, String sortDirection, String keyword, String category) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Specification<Product> spec = (root, query, cb) -> cb.conjunction();
+
         if (keyword != null && !keyword.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%"));
@@ -45,161 +57,187 @@ public class ProductServiceImpl implements ProductService {
 
         if (category != null && !category.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(root.get("category").get("categoryName"), category));
+                    criteriaBuilder.equal(root.get("category").get("categoryName"), category));
         }
 
         Page<Product> productPage = productRepository.findAll(spec, pageable);
+        List<ProductDTO> products = productPage.getContent().stream().map(this::mapToDTO).toList();
 
-        List<Product> products = productPage.getContent();
         if (products.isEmpty()) {
-            logger.warn("No products found for page={} size={} sortBy={} direction={}", pageNumber, pageSize, sortBy, sortDirection);
             throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
         }
 
-        logger.debug("Fetched {} products, totalElements={}, totalPages={}", products.size(), productPage.getTotalElements(), productPage.getTotalPages());
-        return new ProductResponseDTO<>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
+        return new ProductResponseDTO<ProductDTO>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
                 productPage.getTotalPages(), productPage.isFirst(), productPage.isLast(), sortBy, sortDirection);
     }
 
     @Override
-    public Product getProductById(Long productId) {
-        logger.info("Fetching product by id={}", productId);
-        return productRepository.findById(productId)
-                .orElseThrow(() -> {
-                    logger.warn("Product not found with id={}", productId);
-                    return new ResourceNotFoundException("Product", "Product ID", productId);
-                });
+    public ProductDTO getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
+        return mapToDTO(product);
     }
 
     @Override
-    public ProductResponseDTO<Product> getProductsByCategory(long categoryId, int pageNumber, int pageSize, String sortBy, String sortDirection) {
-        logger.info("Fetching products for categoryId={} page={} size={} sortBy={} direction={}", categoryId, pageNumber, pageSize, sortBy, sortDirection);
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> {
-                    logger.error("Category not found with id={}", categoryId);
-                    return new ResourceNotFoundException("Category", "Category ID", categoryId);
-                });
+    public ProductResponseDTO<ProductDTO> getProductsByCategory(String categoryName, int pageNumber, int pageSize, String sortBy, String sortDirection) {
+        Category category = categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Category Name", categoryName));
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Product> productPage = productRepository.findByCategory(category, pageable);
 
-        List<Product> products = productPage.getContent();
+        List<ProductDTO> products = productPage.getContent().stream().map(this::mapToDTO).toList();
         if (products.isEmpty()) {
-            logger.warn("No products found in categoryId={}", categoryId);
             throw new APIException("No products found", HttpStatus.NOT_FOUND.value());
         }
 
-        logger.debug("Fetched {} products in categoryId={} totalElements={} totalPages={}", products.size(), categoryId, productPage.getTotalElements(), productPage.getTotalPages());
-        return new ProductResponseDTO<>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
+        return new ProductResponseDTO<ProductDTO>(products, productPage.getNumber(), 3, productPage.getTotalElements(),
                 productPage.getTotalPages(), productPage.isFirst(), productPage.isLast(), sortBy, sortDirection);
     }
 
     @Override
-    public ProductResponseDTO<Product> searchProductByKeyword(String keyword, int pageNumber, int pageSize, String sortBy, String sortDirection) {
-        logger.info("Searching products by keyword='{}' page={} size={} sortBy={} direction={}", keyword, pageNumber, pageSize, sortBy, sortDirection);
+    public ProductResponseDTO<ProductDTO> searchProductByKeyword(String keyword, int pageNumber, int pageSize, String sortBy, String sortDirection) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
         Page<Product> productPage = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%', pageable);
 
-        List<Product> products = productPage.getContent();
+        List<ProductDTO> products = productPage.getContent().stream().map(this::mapToDTO).toList();
         if (products.isEmpty()) {
-            logger.warn("No products found matching keyword='{}'", keyword);
             throw new APIException("No products found matching keyword: '" + keyword + "'", HttpStatus.NOT_FOUND.value());
         }
 
-        logger.debug("Search results: {} products found for keyword='{}'", products.size(), keyword);
-        return new ProductResponseDTO<>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
+        return new ProductResponseDTO<ProductDTO>(products, productPage.getNumber(), productPage.getSize(), productPage.getTotalElements(),
                 productPage.getTotalPages(), productPage.isFirst(), productPage.isLast(), sortBy, sortDirection);
     }
 
     @Override
     public long addProduct(Product product, long categoryId) {
-        logger.info("Adding new product='{}' categoryId={}", product.getProductName(), categoryId);
         validateProduct(product);
 
         String normalizedName = product.getProductName().trim();
         if (productRepository.findByProductName(normalizedName).isPresent()) {
-            logger.warn("Product creation failed, product already exists: '{}'", normalizedName);
             throw new APIException("Product already exists", HttpStatus.CONFLICT.value());
         }
 
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> {
-                    logger.error("Category not found with id={}", categoryId);
-                    return new ResourceNotFoundException("Category", "Category ID", categoryId);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "Category ID", categoryId));
 
         product.setProductName(normalizedName);
-        product.setImage("default.png");
         product.setCategory(category);
+        product.setImage(product.getImage() != null ? product.getImage() : "default.png");
+        product.setIsActive(true);
+        product.setIsFeatured(false);
+        product.setRating(0.0);
+        product.setReviewCount(0);
+
         double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
         product.setSpecialPrice(specialPrice);
 
         productRepository.save(product);
-        logger.info("Product '{}' created successfully with id={}", normalizedName, product.getProductId());
         return product.getProductId();
     }
 
     @Override
     public void updateProduct(Long productId, Product product) {
-        logger.info("Updating product id={}", productId);
         validateProduct(product);
 
         Product existingProduct = productRepository.findById(productId)
-                .orElseThrow(() -> {
-                    logger.error("Product not found with id={}", productId);
-                    return new ResourceNotFoundException("Product", "Product ID", productId);
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
 
         String normalizedName = product.getProductName().trim();
         if (productRepository.findByProductNameAndProductIdNot(normalizedName, productId).isPresent()) {
-            logger.warn("Update failed, product with name '{}' already exists", normalizedName);
             throw new APIException("Product already exists", HttpStatus.CONFLICT.value());
         }
-
-        Category category = categoryRepository.findById(existingProduct.getCategory().getCategoryId())
-                .orElseThrow(() -> {
-                    logger.error("Category not found with id={}", product.getCategory().getCategoryId());
-                    return new ResourceNotFoundException("Category", "Category ID", product.getCategory().getCategoryId());
-                });
 
         existingProduct.setProductName(normalizedName);
         existingProduct.setDescription(product.getDescription());
         existingProduct.setImage(product.getImage());
         existingProduct.setPrice(product.getPrice());
         existingProduct.setDiscount(product.getDiscount());
-        double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
-        existingProduct.setSpecialPrice(specialPrice);
+        existingProduct.setSpecialPrice(product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice()));
         existingProduct.setQuantity(product.getQuantity());
-        existingProduct.setCategory(category);
+        existingProduct.setBrand(product.getBrand());
+        existingProduct.setSku(product.getSku());
+        existingProduct.setIsActive(product.getIsActive());
+        existingProduct.setIsFeatured(product.getIsFeatured());
 
         productRepository.save(existingProduct);
-        logger.info("Product updated successfully id={}", productId);
     }
 
     @Override
     public void deleteProduct(Long productId) {
-        logger.info("Deleting product id={}", productId);
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> {
-                    logger.error("Product not found with id={}", productId);
-                    return new ResourceNotFoundException("Product", "Product ID", productId);
-                });
-        productRepository.delete(product);
-        logger.info("Product deleted successfully id={}", productId);
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
+        // Soft delete
+        product.setIsActive(false);
+        productRepository.save(product);
+    }
+
+    @Override
+    public ProductDTO uploadProductImage(Long productId, MultipartFile imageFile) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "Product ID", productId));
+
+        String path = System.getProperty("user.dir") + File.separator + "nexcart-backend" 
+              + File.separator + "uploads" + File.separator + "images";
+
+        logger.info("Uploading image to path {}", path);
+        
+        String fileName = uploadImage(path, imageFile);
+        product.setImage(fileName);
+        Product updatedProduct = productRepository.save(product);
+        return mapToDTO(updatedProduct);
+        
     }
 
     private void validateProduct(Product product) {
-        logger.debug("Validating product request: {}", product);
         if (product == null || product.getProductName() == null || product.getProductName().trim().isEmpty()) {
-            logger.warn("Invalid product request: missing product name");
             throw new APIException("Product name is required", HttpStatus.BAD_REQUEST.value());
         }
         if (product.getPrice() == null) {
-            logger.warn("Invalid product request: missing price for product='{}'", product.getProductName());
             throw new APIException("Product price is required", HttpStatus.BAD_REQUEST.value());
         }
-        logger.debug("Product validation passed for '{}'", product.getProductName());
+        if (product.getSku() == null || product.getSku().trim().isEmpty()) {
+            throw new APIException("Product SKU is required", HttpStatus.BAD_REQUEST.value());
+        }
+    }
+
+    private ProductDTO mapToDTO(Product product) {
+        return new ProductDTO(
+                product.getProductId(),
+                product.getProductName(),
+                product.getDescription(),
+                product.getImage(),
+                product.getQuantity(),
+                product.getPrice(),
+                product.getDiscount(),
+                product.getSpecialPrice(),
+                product.getBrand(),
+                product.getSku(),
+                product.getIsActive(),
+                product.getIsFeatured(),
+                product.getRating(),
+                product.getReviewCount(),
+                product.getCategory() != null ? product.getCategory().getCategoryName() : null
+        );
+    }
+
+    private String uploadImage(String path, MultipartFile imageFile) {
+        String originalFileName = imageFile.getOriginalFilename();
+        String randomId = UUID.randomUUID().toString();
+        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String fileName = randomId + extension;
+        Path filePath = Paths.get(path + File.separator + fileName);
+        try {
+            File folder = new File(path);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            Files.copy(imageFile.getInputStream(), filePath);
+        } catch (IOException e) {
+            throw new APIException("Failed to upload image", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        return fileName;
     }
 }

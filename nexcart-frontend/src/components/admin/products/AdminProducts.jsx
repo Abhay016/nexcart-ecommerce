@@ -12,7 +12,7 @@ import DeleteModal from '../../shared/DeleteModal';
 import { deleteProduct } from '../../../store/actions';
 import toast from 'react-hot-toast';
 import ImageUploadForm from './ImageUploadForm';
-import ProductViewModal from '../../shared/ProductViewModal';
+// import ProductViewModal from '../../shared/ProductViewModal';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 const AdminProducts = () => {
@@ -186,11 +186,11 @@ const onDeleteHandler = () => {
       title="Delete Product"
       onDeleteHandler={onDeleteHandler} />
 
-      <ProductViewModal 
+      {/* <ProductViewModal 
         open={openProductViewModal}
         setOpen={setOpenProductViewModal}
         product={selectedProduct}
-      />
+      /> */}
     </div>
   )
 }

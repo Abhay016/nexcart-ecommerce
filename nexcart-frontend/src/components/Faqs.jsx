@@ -53,7 +53,108 @@ export default function FAQPage() {
         },
       ],
     },
+    {
+      title: "Shipping & Delivery",
+      items: [
+        {
+          question: "How long does delivery take?",
+          answer:
+            "Standard delivery usually takes 3–5 business days, while express delivery options are available at checkout.",
+        },
+        {
+          question: "Do you ship internationally?",
+          answer:
+            "Yes, we ship to most countries worldwide. International shipping charges and timelines vary by location.",
+        },
+        {
+          question: "Can I track my order?",
+          answer:
+            "Absolutely! Once your order is shipped, you’ll receive a tracking link via email or SMS.",
+        },
+        {
+          question: "What if my package is delayed?",
+          answer:
+            "If your package is delayed beyond the estimated delivery date, please contact our support team for assistance.",
+        },
+      ],
+    },
+    {
+      title: "Account & Security",
+      items: [
+        {
+          question: "Do I need an account to place an order?",
+          answer:
+            "You can checkout as a guest, but creating an account allows you to track orders, save addresses, and access exclusive deals.",
+        },
+        {
+          question: "How do I reset my password?",
+          answer:
+            "Click on 'Forgot Password' at the login page and follow the instructions to reset your password via email.",
+        },
+        {
+          question: "Is my personal information secure?",
+          answer:
+            "Yes, we use industry-standard encryption and security practices to protect your personal and payment information.",
+        },
+        {
+          question: "Can I update my account details?",
+          answer:
+            "Yes, you can update your name, email, and address anytime from the 'My Account' section.",
+        },
+      ],
+    },
+    {
+      title: "Products & Warranty",
+      items: [
+        {
+          question: "Do your products come with a warranty?",
+          answer:
+            "Yes, most electronics and appliances come with a manufacturer’s warranty. Details are mentioned on the product page.",
+        },
+        {
+          question: "How can I claim warranty service?",
+          answer:
+            "You can contact the manufacturer directly or reach out to our support team for guidance on warranty claims.",
+        },
+        {
+          question: "Are your products authentic?",
+          answer:
+            "Yes, we only sell 100% genuine products sourced directly from brands or authorized distributors.",
+        },
+        {
+          question: "Do you offer installation services?",
+          answer:
+            "For certain appliances, we provide free installation services. Check the product page for eligibility.",
+        },
+      ],
+    },
+    {
+      title: "Support & Contact",
+      items: [
+        {
+          question: "How can I contact customer support?",
+          answer:
+            "You can reach us via email at support@nexcart.com or call our helpline at +1 (123) 456-7890.",
+        },
+        {
+          question: "What are your support hours?",
+          answer:
+            "Our support team is available Monday to Saturday, 9 AM – 8 PM IST.",
+        },
+        {
+          question: "Do you offer live chat support?",
+          answer:
+            "Yes, live chat support is available on our website during business hours.",
+        },
+        {
+          question: "Where can I find updates about offers?",
+          answer:
+            "Subscribe to our newsletter or follow us on social media to stay updated on the latest deals and offers.",
+        },
+      ],
+    },
   ];
+
 
   const [openQuestion, setOpenQuestion] = useState(null);
 
@@ -100,15 +201,13 @@ export default function FAQPage() {
                           {item.question}
                         </span>
                         <ChevronRight
-                          className={`w-6 h-6 transform transition-transform ${
-                            isOpen ? "rotate-90 text-rose-500" : "text-gray-400"
-                          }`}
+                          className={`w-6 h-6 transform transition-transform ${isOpen ? "rotate-90 text-rose-500" : "text-gray-400"
+                            }`}
                         />
                       </div>
                       <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          isOpen ? "max-h-40 mt-3" : "max-h-0"
-                        }`}
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-40 mt-3" : "max-h-0"
+                          }`}
                       >
                         <p className="text-base text-gray-600 leading-relaxed">
                           {item.answer}

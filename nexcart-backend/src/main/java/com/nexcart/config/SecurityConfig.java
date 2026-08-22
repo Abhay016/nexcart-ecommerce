@@ -73,6 +73,8 @@ public class SecurityConfig {
                 logger.debug("Configuring endpoint authorization rules");
                 authz
                     .requestMatchers("/api/public/**").permitAll()
+                    .requestMatchers("/uploads/images/**").permitAll()
+                    .requestMatchers("/api/reviews/**").permitAll()
                     .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/swagger-ui/**").permitAll()

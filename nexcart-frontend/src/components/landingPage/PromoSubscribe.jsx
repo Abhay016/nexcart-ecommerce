@@ -4,22 +4,22 @@ import { ShieldCheck, Truck, Sparkles, Users } from "lucide-react";
 export default function PromoSubscribe() {
   const features = [
     {
-      icon: <ShieldCheck className="w-10 h-10 text-blue-600" />,
+      icon: <ShieldCheck className="w-12 h-12 text-indigo-600 group-hover:text-violet-600 transition-colors" />,
       title: "Secure Checkout",
       description: "Your data is protected with industry‑leading encryption.",
     },
     {
-      icon: <Truck className="w-10 h-10 text-green-600" />,
+      icon: <Truck className="w-12 h-12 text-green-600 group-hover:text-emerald-600 transition-colors" />,
       title: "Fast Shipping",
       description: "Get your orders delivered quickly and reliably worldwide.",
     },
     {
-      icon: <Sparkles className="w-10 h-10 text-pink-500" />,
+      icon: <Sparkles className="w-12 h-12 text-pink-500 group-hover:text-rose-500 transition-colors" />,
       title: "Exclusive Deals",
       description: "Unlock members‑only discounts and seasonal offers.",
     },
     {
-      icon: <Users className="w-10 h-10 text-purple-600" />,
+      icon: <Users className="w-12 h-12 text-purple-600 group-hover:text-indigo-600 transition-colors" />,
       title: "Community Access",
       description: "Join a vibrant fashion community with insider tips.",
     },
@@ -35,39 +35,43 @@ export default function PromoSubscribe() {
 
       <div className="relative z-10 container mx-auto">
         {/* Heading */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-sm">
-            Get 10% Off on Your First Order
+            Get 10% Off Your First Order
           </h2>
           <p className="mt-3 text-lg text-gray-600">
             Plus exclusive access to product drops, style tips, and insider deals.
           </p>
+          <div className="mt-6 w-28 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-rose-500 mx-auto rounded-full animate-pulse"></div>
         </div>
 
         {/* Subscription Form */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mb-16">
           <input
             type="email"
             placeholder="Enter your email *"
-            className="w-full sm:w-96 px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            className="w-full sm:w-96 px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition"
           />
-          <button className="px-6 py-3 rounded-md bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold shadow-md hover:scale-105 transition-transform duration-300">
+          <button className="px-8 py-3 rounded-md bg-gradient-to-r from-indigo-600 via-violet-600 to-rose-600 text-white font-semibold shadow-lg hover:scale-105 hover:shadow-xl transition-transform duration-300">
             Subscribe
           </button>
         </div>
 
-        {/* Professional Feature Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        {/* Feature Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16">
           {features.map((feature, idx) => (
             <div
               key={idx}
-              className="flex flex-col items-center text-center bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6"
+              className="group flex flex-col items-center text-center bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-8 hover:-translate-y-2"
             >
               {feature.icon}
-              <h3 className="mt-4 text-lg font-semibold text-gray-800">
+              <h3 className="mt-6 text-lg font-semibold text-gray-900">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-gray-600 text-sm">{feature.description}</p>
+              <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                {feature.description}
+              </p>
+              <div className="mt-4 w-16 h-1 bg-gradient-to-r from-indigo-400 to-rose-400 rounded-full"></div>
             </div>
           ))}
         </div>

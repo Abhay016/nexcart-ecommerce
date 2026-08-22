@@ -51,7 +51,7 @@ const ItemContent = ({
             {/* Product Info */}
             <div className="md:col-span-2 flex items-start gap-4 w-full">
                 <img
-                    src={`${import.meta.env.VITE_BACK_END_URL}/images/${image}`}
+                    src={`${import.meta.env.VITE_NEXCART_BACKEND_BASE_URL}/uploads/images/${image}`}
                     alt={productName}
                     className="h-24 w-24 object-cover rounded-lg border border-gray-100 shadow-sm hover:scale-105 transition-transform duration-300"
                 />

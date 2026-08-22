@@ -12,7 +12,7 @@ const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loader, setLoader] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -22,17 +22,22 @@ const Register = () => {
   } = useForm({
     mode: "onTouched",
   });
-  
+
   const watchPassword = watch("password");
+
   const registerHandler = async (data) => {
+    if (data.password !== data.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
     dispatch(registerNewUser(data, toast, reset, navigate, setLoader));
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex justify-center items-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 py-16">
+    <div className="min-h-[calc(100vh-64px)] flex justify-center items-center bg-gradient-to-br from-indigo-100 via-white to-rose-100 py-16">
       <form
         onSubmit={handleSubmit(registerHandler)}
-        className="sm:w-[500px] w-[360px] bg-white shadow-2xl rounded-2xl py-10 sm:px-10 px-6 border border-gray-100"
+        className="sm:w-[500px] w-[360px] bg-white/90 shadow-2xl rounded-2xl py-10 sm:px-10 px-6 border border-gray-100 backdrop-blur-md"
       >
         {/* Header */}
         <div className="flex flex-col items-center justify-center space-y-4">
@@ -91,8 +96,12 @@ const Register = () => {
             placeholder="Re-enter your password"
             register={register}
             errors={errors}
-            watch={watchPassword}
           />
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm">
+              {errors.confirmPassword.message}
+            </p>
+          )}
         </div>
 
         {/* Submit Button */}

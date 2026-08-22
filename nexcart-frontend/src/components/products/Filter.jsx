@@ -61,17 +61,17 @@ const Filter = ({ categories }) => {
   };
 
   return (
-    <div className="flex lg:flex-row flex-col-reverse lg:justify-between justify-center items-center gap-6 bg-gradient-to-r from-gray-50 via-white to-rose-50 p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+    <div className="flex lg:flex-row flex-col-reverse lg:justify-between justify-center items-center gap-6 bg-gradient-to-r from-indigo-50 via-white to-rose-50 p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
       
       {/* SEARCH BAR */}
       <div className="relative flex items-center 2xl:w-[450px] sm:w-[420px] w-full">
-        <FiSearch className="absolute left-3 text-slate-500" size={20} />
+        <FiSearch className="absolute left-3 text-gray-500" size={20} />
         <input
           type="text"
           placeholder="Search products..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 text-slate-800 rounded-lg py-2 pl-10 pr-4 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition duration-300"
+          className="border border-gray-300 text-gray-800 rounded-lg py-2 pl-10 pr-4 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition duration-300"
         />
       </div>
 
@@ -108,7 +108,7 @@ const Filter = ({ categories }) => {
             className="flex items-center gap-2 h-10 shadow-md hover:shadow-lg transition-transform hover:scale-105 font-semibold"
           >
             Sort By
-            {sortOrder === "asc" ? <FiArrowUp size={20} /> : <FiArrowDown size={20} />}
+            {sortOrder === "asc" ? <FiArrowUp size={18} /> : <FiArrowDown size={18} />}
           </Button>
         </Tooltip>
 

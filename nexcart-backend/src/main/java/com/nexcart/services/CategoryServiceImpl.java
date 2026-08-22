@@ -9,9 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import com.nexcart.Exceptions.APIException;
-import com.nexcart.Exceptions.ResourceNotFoundException;
+
 import com.nexcart.dto.CategoryResponseDTO;
+import com.nexcart.exceptions.APIException;
+import com.nexcart.exceptions.ResourceNotFoundException;
 import com.nexcart.models.Category;
 import com.nexcart.repositories.CategoryRepository;
 
